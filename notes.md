@@ -13,6 +13,13 @@
 <br>
 <br>
 
+# Fatores de emissão de CO₂ dos combustíveis usados (kg GEE/un.)
+Fator de emissão de CO₂ do diesel comercial: 2,5858
+Fator de emissão de CO₂ da gasolina comercial: 2,027
+Fator de emissão de CO₂ do etanol hidratado: 1,457
+
+<br>
+
 # Emissão de CO₂ dos veículos
 
 | Veículo            | Combustível | Emissão CO₂ (kg CO₂/p.km) |
