@@ -1,5 +1,6 @@
 import psycopg
 from psycopg.rows import dict_row
+import os
 
 class Database:
     def __init__(self, connection_string):
@@ -21,3 +22,4 @@ class Database:
                 # Return number of affected rows
                 return cursor.rowcount       
     
+db = Database(os.environ.get('POSTGRESQL_CONNECTION_STRING'))
