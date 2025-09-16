@@ -60,4 +60,4 @@ Fator de emissão de CO₂ do etanol hidratado: 1,457
 <br>
 
 # Fórmula
-Emissão por pessoa = (Consumo do Veículo *(L/km)* * Fator de emissã do combustível *(kg CO₂/L)* ​) / Número de passageiros 
+Emissão por pessoa por km = (Consumo do Veículo *(L/km)* * Fator de emissão do combustível *(kg CO₂/L)* ​) / Número de passageiros 
