@@ -1,6 +1,5 @@
 import psycopg
 from psycopg.rows import dict_row
-import os
 
 class Database:
     def __init__(self, connection_string):
