@@ -21,7 +21,4 @@ class Database:
                 # Query is INSERT, UPDATE or DELETE
                 # Return number of affected rows
                 return cursor.rowcount       
-
-if __name__ == '__main__':
-    db = Database(os.environ.get('POSTGRESQL_CONNECTION_STRING'))
     
