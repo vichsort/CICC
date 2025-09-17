@@ -126,7 +126,7 @@ A API possui um endpoint principal para criar registros de emissão.
 
 Cria um novo registro de emissão com base nos dados da viagem.
 
-  - **Endpoint:** `POST /`
+  - **Endpoint:** `POST /api/emission/`
 
   - **Método:** `POST`
 
@@ -149,5 +149,118 @@ Cria um novo registro de emissão com base nos dados da viagem.
     {
         "ok": true,
         "message": "Registro de emissão criado para João da Silva. Emissão calculada: 35.82 kg CO₂."
+    }
+    ```
+
+  <br>
+
+  - **Endpoint:** `GET /api/emission/`
+
+  - **Método:** `GET`
+
+  - **Resposta de Sucesso (Código `200 OK`):**
+
+    ```json
+    [
+      {
+        "distance": "23.00",
+        "emission_amount": "0.585",
+        "fuel": "gasoline",
+        "id_record": 4,
+        "people_amount": 3,
+        "person_name": "Gabriel",
+        "vehicle": "car-standard"
+      },
+      {
+        "distance": "11.00",
+        "emission_amount": "0.198",
+        "fuel": "gasoline",
+        "id_record": 5,
+        "people_amount": 2,
+        "person_name": "Maria",
+        "vehicle": "motorcycle-standard"
+      }
+    ]
+    ```
+
+  <br>
+
+  - **Endpoint:** `GET /api/emission/co2/`
+
+  - **Método:** `GET`
+
+  - **Resposta de Sucesso (Código `200 OK`):**
+
+    ```json
+    {
+      "records": [
+        {
+          "emission_amount": "0.585"
+        },
+        {
+          "emission_amount": "0.198"
+        }
+      ],
+      "total_co2": "0.783"
+    }
+    ```
+
+  <br>
+
+  - **Endpoint:** `GET /api/emission/vehicles/`
+
+  - **Método:** `GET`
+
+  - **Resposta de Sucesso (Código `200 OK`):**
+
+    ```json
+    [
+      {
+        "vehicle": "car-standard"
+      },
+      {
+        "vehicle": "motorcycle-flex"
+      }
+    ]
+    ```
+
+  <br>
+
+  - **Endpoint:** `GET /api/emission/fuels/`
+
+  - **Método:** `GET`
+
+  - **Resposta de Sucesso (Código `200 OK`):**
+
+    ```json
+    [
+      {
+        "fuel": "gasoline"
+      },
+      {
+        "fuel": "diesel"
+      }
+    ]
+    ```
+
+  <br>
+
+  - **Endpoint:** `GET /api/emission/km/`
+
+  - **Método:** `GET`
+
+  - **Resposta de Sucesso (Código `200 OK`):**
+
+    ```json
+    {
+      "records": [
+        {
+          "distance": "23.00"
+        },
+        {
+          "distance": "11.00"
+        }
+      ],
+      "total_km": "34.00"
     }
     ```
