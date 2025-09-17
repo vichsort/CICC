@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from ..database.database import db
+from backend.database.database import db
 
 emission_record = Blueprint('emission', __name__)
 
