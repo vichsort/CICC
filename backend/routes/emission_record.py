@@ -5,7 +5,7 @@ Este módulo define uma rota da API para o cálculo e armazenamento de registros
 CO₂ provenientes de viagens. Ele lida com a recepção dos dados, o cálculo da emissão 
 e a persistência no banco de dados.
 """
-
+from decimal import Decimal
 from flask import Blueprint, request, jsonify
 from backend.database.database import db
 from backend.utils.emission_calculator import calculate_emission
@@ -93,5 +93,23 @@ def get_emission_record():
     try:
         records = db.query('SELECT * FROM public.emission_records;')
         return jsonify(records), 200
+    except Exception as e:
+        return jsonify({'ok': False, 'message': str(e)}), 500
+    
+
+@emission_record.route('/co2/', methods=['GET'])
+def get_co2():
+    try:
+        co2 = db.query('SELECT emission_amount FROM public.emission_records;')
+        total_co2 = Decimal('0')
+        for record in co2:
+            record['emission_amount'] = Decimal(record['emission_amount'])
+            total_co2 += record['emission_amount']
+
+        return jsonify({
+            'total_co2': str(total_co2),
+            'records': co2
+        }), 200
+    
     except Exception as e:
         return jsonify({'ok': False, 'message': str(e)}), 500
