@@ -113,3 +113,15 @@ def get_co2():
     
     except Exception as e:
         return jsonify({'ok': False, 'message': str(e)}), 500
+    
+@emission_record.route('/vehicles/', methods=['GET'])
+def get_vehicles():
+    try:
+        vehicles = db.query('SELECT vehicle FROM public.emission_records;')
+
+        return jsonify(
+            vehicles
+        ), 200
+    
+    except Exception as e:
+        return jsonify({'ok': False, 'message': str(e)}), 500
