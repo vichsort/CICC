@@ -39,3 +39,12 @@ def create_emission_record():
             'message': f'Emission record created for {person_name}. Calculated emission: {emission} kg CO₂.'
         }
     ), 201
+
+
+@emission_record.route('/', methods=['GET'])
+def get_emission_record():
+    try:
+        records = db.query('SELECT * FROM public.emission_records;')
+        return jsonify(records), 200
+    except Exception as e:
+        return jsonify({'ok': False, 'message': str(e)}), 500
