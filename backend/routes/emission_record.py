@@ -139,3 +139,21 @@ def get_fuels():
     
     except Exception as e:
         return jsonify({'ok': False, 'message': str(e)}), 500
+    
+
+@emission_record.route('/km/', methods=['GET'])
+def get_km():
+    try:
+        km = db.query('SELECT distance FROM public.emission_records;')
+        total_km = Decimal('0')
+        for distance in km:
+            distance['distance'] = Decimal(distance['distance'])
+            total_km += distance['distance']
+
+        return jsonify({
+            'total_km': str(total_km),
+            'records': km
+        }), 200
+    
+    except Exception as e:
+        return jsonify({'ok': False, 'message': str(e)}), 500
