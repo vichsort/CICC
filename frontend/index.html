@@ -1,76 +1,13 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-<head>
+<html lang="">
+  <head>
     <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consórcio Itá</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <style>
-        .form-section {
-            padding: 20px;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container mt-5">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card shadow-sm">
-                    <div class="card-body form-section">
-                        <h3 class="card-title text-center mb-4">Registro de Emissões</h3>
-                        
-                        <form id="vehicleForm">
-                            <div class="mb-3">
-                                <label for="person_name" class="form-label">Nome:</label>
-                                <input type="text" id="person_name" name="person_name" class="form-control" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="distance" class="form-label">Distância (km):</label>
-                                <input type="number" id="distance" name="distance" class="form-control" required>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label for="vehicle" class="form-label">Veículo:</label>
-                                <select id="vehicle" name="vehicle" class="form-select" required>
-                                    <option value="" disabled selected>Selecione um veículo</option>
-                                    <option value="bus">Ônibus</option>
-                                    <option value="car">Carro</option>
-                                    <option value="motorcycle">Motocicleta</option>
-                                </select>
-                            </div>
-
-                            <div id="vehicleTypeContainer" class="mb-3" style="display: none;">
-                                <label for="vehicle_type" class="form-label">Tipo de veículo:</label>
-                                <select id="vehicle_type" name="vehicle_type" class="form-select">
-                                    <option value="" disabled selected>Selecione um tipo</option>
-                                </select>
-                            </div>
-
-                            <div id="fuelContainer" class="mb-3">
-                                <label for="fuel" class="form-label">Combustível:</label>
-                                <select id="fuel" name="fuel" class="form-select" required>
-                                    <option value="" disabled selected>Selecione um combustível</option>
-                                </select>
-                            </div>
-                            
-                            <div id="peopleAmountContainer" class="mb-3" style="display: none;">
-                                <label for="people_amount" class="form-label">Quantas pessoas vieram (incluindo você) neste veículo?</label>
-                                <input type="number" id="people_amount" name="people_amount" class="form-control" step="1">
-                            </div>
-
-                            <div class="d-grid gap-2 mt-4">
-                                <button type="submit" class="btn btn-primary">Enviar</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="script.js"></script>
-</body>
+    <title>Vite App</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>

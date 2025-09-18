@@ -44,23 +44,32 @@ def create_emission_record():
     person_name = data.get('person_name')
     distance = data.get('distance')
     # Define 'None' como padrão para 'people_amount', tornando-o opcional.
-    people_amount = data.get('people_amount', None) 
+    people_amount = data.get('people_amount', None)
     vehicle = data.get('vehicle')
     fuel = data.get('fuel')
 
     # Concatena o tipo do veículo ao veículo principal, se existir.
     # Exemplo: 'car' + 'standard' -> 'car-standard'
+    print("INICIAL: " + vehicle)
     if 'vehicle_type' in data:
         vehicle += "-" + str(data.get('vehicle_type'))
+        print("CORRIGID: " + vehicle)
 
     # Chama a função utilitária para calcular a emissão de CO₂.
     # Garante a conversão de tipos para os parâmetros numéricos.
+    calculation_people_amount = None
+    
+    if 'bus' not in vehicle:
+        calculation_people_amount = int(people_amount) if people_amount is not None else 1
+
     emission = calculate_emission(
-        vehicle=vehicle, 
-        fuel=fuel, 
-        people_amount=int(people_amount) if people_amount is not None else 1, 
+        vehicle=vehicle,
+        fuel=fuel,
+        people_amount=calculation_people_amount,
         distance=float(distance)
     )
+    
+    print(emission)
 
     # Executa a query para inserir o novo registro no banco de dados.
     # A utilização de parâmetros (%s) previne ataques de SQL Injection.

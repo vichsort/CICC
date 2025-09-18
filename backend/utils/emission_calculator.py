@@ -1,12 +1,12 @@
 # Structure of the reference: vehicle -> fuel -> people_amount -> carbon emission
 # `None` = amount of people is irrelevant
 emission_reference = {
-    'micro-bus': {
+    'bus-micro-bus': {
         'diesel': {
             None: 0.427
         }
     },
-    'municipal-bus': {
+    'bus-municipal-bus': {
         'diesel': {
             None: 0.09
         },
@@ -14,7 +14,7 @@ emission_reference = {
             None: 0.084
         }
     },
-    'travel-bus': {
+    'bus-travel-bus': {
         'diesel': {
             None: 0.028
         },
@@ -66,4 +66,5 @@ emission_reference = {
 }
 
 def calculate_emission(vehicle, fuel, people_amount, distance):
-    return emission_reference[vehicle][fuel][people_amount] * distance
+    result = emission_reference[vehicle][fuel][people_amount] * distance
+    return result
