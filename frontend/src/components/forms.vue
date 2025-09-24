@@ -1,4 +1,4 @@
-<template>
+<<template>
   <div class="form-page-wrapper">
     <div class="card shadow-sm large-card">
       <div class="card-body form-section">
@@ -241,4 +241,4 @@ function onSubmit() {
   padding: 0.75rem 1rem;
   font-size: 1.05rem;
 }
-</style>
+</style>>
