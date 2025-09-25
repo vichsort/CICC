@@ -1,9 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import VehiclePieChart from './GraphVeiculos.vue';
+import GraphVeiculos from './GraphVeiculos.vue';
 import FuelBarChart from './GraphCombustiveis.vue';
 
-// --- Estados Reativos ---
 const isLoading = ref(true);
 const error = ref(null);
 const totalCo2 = ref(0);
@@ -11,7 +10,6 @@ const totalKm = ref(0);
 const vehicleData = ref({});
 const fuelData = ref({});
 
-// --- Constante da API ---
 const API_BASE_URL = 'http://127.0.0.1:5000/api/emission';
 
 /**
@@ -26,7 +24,6 @@ function countItems(dataArray, key) {
   }, {});
 }
 
-// --- Função Principal para Buscar os Dados da API ---
 async function fetchDashboardData() {
   isLoading.value = true;
   error.value = null;
@@ -68,7 +65,6 @@ async function fetchDashboardData() {
   }
 }
 
-// Hook do ciclo de vida: busca os dados quando a página é montada
 onMounted(() => {
   fetchDashboardData();
 });
@@ -90,8 +86,8 @@ onMounted(() => {
     </div>
 
     <div v-else class="dashboard-wrapper">
-      <h1 class="dashboard-title mb-4">Dashboard de Emissões 📊</h1>
-      
+      <h1 class="dashboard-title mb-4">Dashboard de Emissões</h1>
+
       <div class="row mb-4">
         <div class="col-md-6 mb-3 mb-md-0">
           <div class="card text-center kpi-card">
@@ -114,10 +110,9 @@ onMounted(() => {
       <div class="row">
         <div class="col-md-6 mb-3 mb-md-0">
           <div class="card">
-            <VehiclePieChart 
-              v-if="Object.keys(vehicleData).length > 0" 
-              :data="vehicleData" 
-            />
+            <h5 class="chart-title">Veículos Utilizados</h5>
+
+            <GraphVeiculos v-if="Object.keys(vehicleData).length > 0" :data="vehicleData" />
             <div v-else class="card-body text-center d-flex align-items-center justify-content-center">
               <p>Nenhum dado de veículo para exibir.</p>
             </div>
@@ -125,10 +120,7 @@ onMounted(() => {
         </div>
         <div class="col-md-6">
           <div class="card">
-            <FuelBarChart
-              v-if="Object.keys(fuelData).length > 0"
-              :data="fuelData"
-            />
+            <FuelBarChart v-if="Object.keys(fuelData).length > 0" :data="fuelData" />
             <div v-else class="card-body text-center d-flex align-items-center justify-content-center">
               <p>Nenhum dado de combustível para exibir.</p>
             </div>
@@ -168,7 +160,7 @@ onMounted(() => {
 .kpi-card {
   border: none;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s ease-in-out;
 }
 
@@ -193,9 +185,18 @@ onMounted(() => {
 .card {
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  min-height: 450px;
-  display: flex;
-  justify-content: center;
+  min-height: 550px;
   padding: 1rem;
+  box-sizing: border-box;
+
+  display: grid;
+  grid-template-rows: auto 1fr; 
+  overflow: hidden; 
+}
+
+.chart-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  text-align: center;
 }
 </style>
