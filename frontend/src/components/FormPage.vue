@@ -1,14 +1,11 @@
 <script setup>
 import { ref } from 'vue';
-// Importe o componente do formulário aqui, pois ele agora é um filho desta página
 import ConsorcioItaForm from './forms.vue';
 
-// --- Estados Reativos ---
 const isLoading = ref(false);
 const formSubmittedSuccessfully = ref(false);
 const apiResponseMessage = ref('');
 
-// --- Função de Envio para a API (mova esta função para cá) ---
 async function handleSubmit(payload) {
   isLoading.value = true;
   apiResponseMessage.value = '';
@@ -58,7 +55,7 @@ function resetForm() {
         </div>
         <p class="mt-2">Enviando dados...</p>
       </div>
-      
+
       <ConsorcioItaForm @submit="handleSubmit" />
 
       <div v-if="apiResponseMessage" class="alert alert-danger mt-4">

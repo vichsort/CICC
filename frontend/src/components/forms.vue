@@ -1,4 +1,4 @@
-<<template>
+<template>
   <div class="form-page-wrapper">
     <div class="card shadow-sm large-card">
       <div class="card-body form-section">
@@ -165,22 +165,48 @@ function normalizeValue(str) {
 }
 
 function validate() {
-  errors.person_name = form.person_name ? '' : 'Nome é obrigatório.';
+  const newErrors = {};
+
+  newErrors.person_name = form.person_name ? '' : 'Nome é obrigatório.';
+
   const dist = parseFloat(String(form.distance).replace(',', '.'));
-  errors.distance = (!isNaN(dist) && dist > 0) ? '' : 'Distância deve ser um número positivo.';
-  if (showPeopleAmount.value) {
-    errors.people_amount = (form.people_amount && form.people_amount >= 1 && form.people_amount <= peopleMax.value) ? '' : `Quantidade de pessoas (1-${peopleMax.value}) é obrigatória.`;
-  } else {
-    errors.people_amount = '';
+  newErrors.distance = (!isNaN(dist) && dist > 0) ? '' : 'Distância deve ser um número positivo.';
+
+  // Validação de Veículo
+  newErrors.vehicle = form.vehicle ? '' : 'Selecione um veículo.';
+
+  if (showVehicleType.value) {
+    newErrors.vehicle_type = form.vehicle_type ? '' : 'Selecione o tipo de veículo.';
   }
-  errors.vehicle = form.vehicle ? '' : 'Selecione um veículo.';
-  errors.vehicle_type = showVehicleType.value ? (form.vehicle_type ? '' : 'Selecione o tipo de veículo.') : '';
-  errors.fuel = showFuel.value ? (form.fuel ? '' : 'Selecione o combustível.') : '';
-  return Object.values(errors).every(v => v === '');
+
+  if (showFuel.value) {
+    newErrors.fuel = form.fuel ? '' : 'Selecione o combustível.';
+  }
+
+  if (showPeopleAmount.value) {
+    newErrors.people_amount = (form.people_amount && form.people_amount >= 1 && form.people_amount <= peopleMax.value)
+      ? ''
+      : `Quantidade de pessoas (1-${peopleMax.value}) é obrigatória.`;
+  }
+
+  for (const key in errors) {
+    delete errors[key];
+  }
+
+  Object.assign(errors, newErrors);
+  return Object.values(newErrors).every(v => v === '');
 }
 
 function onSubmit() {
-  if (!validate()) return;
+  console.log("Botão clicado, iniciando validação...");
+
+  if (!validate()) {
+    console.error("Validação FALHOU!");
+    return;
+  }
+
+  console.log("Validação passou! Emitindo evento...");
+
   const distanceNumber = parseFloat(String(form.distance).replace(',', '.'));
   const payload = {
     person_name: form.person_name,
@@ -198,33 +224,23 @@ function onSubmit() {
 
 
 <style scoped>
-/* Novo wrapper para centralizar o conteúdo na página */
 .form-page-wrapper {
   display: flex;
   justify-content: center;
-  /* Centraliza horizontalmente */
   align-items: center;
-  /* Centraliza verticalmente */
-  min-height: 95vh;
-  /* Ocupa no mínimo 95% da altura da tela */
+  min-height: 80vh;
   padding: 2rem;
-  /* Adiciona um respiro nas bordas da tela */
   box-sizing: border-box;
 }
 
 .form-section {
   padding: 2.5rem;
-  /* Aumentando um pouco o padding interno */
 }
 
-/* Ajustes no card para usar as novas proporções */
 .large-card {
   width: 60vw;
-  /* Ocupa 60% da largura da tela */
   max-width: 900px;
-  /* Um limite máximo para telas muito grandes */
   min-width: 360px;
-  /* Um limite mínimo para telas pequenas */
 }
 
 .card-title {
@@ -241,4 +257,4 @@ function onSubmit() {
   padding: 0.75rem 1rem;
   font-size: 1.05rem;
 }
-</style>>
+</style>

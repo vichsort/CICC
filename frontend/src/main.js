@@ -5,12 +5,12 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 
 import App from './App.vue';
 
-import ConsorcioltaForm from './components/forms.vue';
+import FormPage from './components/FormPage.vue';
 import HomePage from './components/DashboardPage.vue'; 
 
 const routes = [
   { path: '/', component: HomePage }, 
-  { path: '/consorcio', component: ConsorcioltaForm }
+  { path: '/forms', component: FormPage }
 ];
 
 const router = createRouter({
@@ -18,7 +18,6 @@ const router = createRouter({
   routes
 });
 
-// 4. Use o router e monte a aplicação
 const app = createApp(App);
 app.use(router);
 app.mount('#app');

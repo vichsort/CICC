@@ -2,7 +2,7 @@
   <div>
     <nav>
       <router-link to="/">Início</router-link> |
-      <router-link to="/consorcio">Formulário de Consórcio</router-link>
+      <router-link to="/forms">Formulário de Consórcio</router-link>
     </nav>
     
     <router-view></router-view>
@@ -10,11 +10,10 @@
 </template>
 
 <script setup>
-// Sem lógica de formulário aqui, apenas imports se necessário
+
 </script>
 
 <style>
-/* Estilos globais (por exemplo, para o corpo da página ou a navegação) */
 nav {
   padding: 30px;
   text-align: center;
