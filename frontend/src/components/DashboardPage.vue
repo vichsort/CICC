@@ -89,16 +89,16 @@ onMounted(() => {
       <h1 class="dashboard-title mb-4">Dashboard de Emissões</h1>
 
       <div class="row mb-4">
-        <div class="col-md-6 mb-3 mb-md-0">
-          <div class="card text-center kpi-card">
+        <div class="col-md-6 mb-3 mb-md-0 px-2">
+          <div class="card text-center kpi-card minimal-card">
             <div class="card-body">
               <h5 class="card-title">Emissão Total de CO₂</h5>
               <p class="kpi-value">{{ totalCo2 }} kg</p>
             </div>
           </div>
         </div>
-        <div class="col-md-6">
-          <div class="card text-center kpi-card">
+        <div class="col-md-6 px-2">
+          <div class="card text-center kpi-card minimal-card">
             <div class="card-body">
               <h5 class="card-title">Distância Total Percorrida</h5>
               <p class="kpi-value">{{ totalKm }} km</p>
@@ -108,18 +108,18 @@ onMounted(() => {
       </div>
 
       <div class="row">
-        <div class="col-md-6 mb-3 mb-md-0">
+        <div class="col-md-6 mb-3 mb-md-0 px-2">
           <div class="card">
             <h5 class="chart-title">Veículos Utilizados</h5>
-
             <GraphVeiculos v-if="Object.keys(vehicleData).length > 0" :data="vehicleData" />
             <div v-else class="card-body text-center d-flex align-items-center justify-content-center">
               <p>Nenhum dado de veículo para exibir.</p>
             </div>
           </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 px-2">
           <div class="card">
+            <h5 class="chart-title">Combustíveis Utilizados</h5>
             <FuelBarChart v-if="Object.keys(fuelData).length > 0" :data="fuelData" />
             <div v-else class="card-body text-center d-flex align-items-center justify-content-center">
               <p>Nenhum dado de combustível para exibir.</p>
@@ -184,14 +184,31 @@ onMounted(() => {
 
 .card {
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   min-height: 550px;
-  padding: 1rem;
   box-sizing: border-box;
-
   display: grid;
-  grid-template-rows: auto 1fr; 
-  overflow: hidden; 
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+}
+
+.chart-title {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+.minimal-card {
+  min-height: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-template-rows: unset;
+  padding: 0.5rem; 
+}
+.minimal-card .card-body {
+  padding: 0.5rem;
+  flex-grow: 1;
 }
 
 .chart-title {

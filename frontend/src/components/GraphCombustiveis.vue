@@ -2,6 +2,7 @@
 import { ref, onMounted, watch } from 'vue';
 import * as d3 from 'd3';
 import { generateBluePalette } from '../utils/cores';
+import { translateVehicleKey } from '../utils/tradutor';
 
 const props = defineProps({
     data: {
@@ -15,60 +16,101 @@ const svgRef = ref(null);
 const drawChart = () => {
     const svg = d3.select(svgRef.value);
     svg.selectAll('*').remove();
-    const dataset = Object.entries(props.data).map(([key, value]) => ({ key, value }));
-
-    const margin = { top: 30, right: 20, bottom: 50, left: 40 };
     const { width, height } = svg.node().getBoundingClientRect();
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
+    const margin = { top: 30, right: 20, bottom: 80, left: 40 }
+    const chartWidth = width - margin.left - margin.right;
+    const chartHeight = height - margin.top - margin.bottom;
 
-    const chart = svg.append('g')
+    const g = svg.append('g')
         .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
+    const rawData = Object.entries(props.data).map(([key, value]) => ({ key, value }));
+    rawData.sort((a, b) => translateVehicleKey(a.key).localeCompare(translateVehicleKey(b.key)));
+
+    const categories = rawData.map(d => d.key);
+    const translatedCategories = categories.map(translateVehicleKey);
+
     const xScale = d3.scaleBand()
-        .domain(dataset.map(d => d.key))
-        .range([0, innerWidth])
-        .padding(0.2);
+        .domain(translatedCategories)
+        .range([0, chartWidth])
+        .padding(0.1);
 
     const yScale = d3.scaleLinear()
-        .domain([0, d3.max(dataset, d => d.value) * 1.1])
-        .range([innerHeight, 0]);
+        .domain([0, d3.max(rawData, d => d.value) * 1.2])
+        .range([chartHeight, 0]);
 
-    const xAxis = d3.axisBottom(xScale);
-    chart.append('g')
-        .attr('transform', `translate(0, ${innerHeight})`)
-        .call(xAxis)
+    g.append('g')
+        .attr('transform', `translate(0, ${chartHeight})`)
+        .call(d3.axisBottom(xScale))
         .selectAll('text')
-        .style('text-anchor', 'end')
-        .attr('dx', '-.8em')
-        .attr('dy', '.15em')
-        .attr('transform', 'rotate(-25)');
+        .attr('class', 'x-axis-label')
+        .attr('transform', 'rotate(-45)')
+        .style('text-anchor', 'end');
 
-    const yAxis = d3.axisLeft(yScale);
-    chart.append('g').call(yAxis);
+    g.append('g')
+        .call(d3.axisLeft(yScale).ticks(5).tickFormat(d3.format('d')))
+        .selectAll('text')
+        .attr('class', 'y-axis-label');
 
-    const colorScale = d3.scaleOrdinal()
-        .domain(dataset.map(d => d.key))
-        .range(generateBluePalette(dataset.length));
+    g.append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', 0 - margin.left + 5)
+        .attr('x', 0 - (chartHeight / 2))
+        .attr('dy', '1em')
+        .attr('class', 'axis-label')
+        .style('text-anchor', 'middle')
+        .text('Número de Registros');
 
-    chart.selectAll('.bar')
-        .data(dataset)
+    const bars = g.selectAll('.bar')
+        .data(rawData)
         .join('rect')
         .attr('class', 'bar')
-        .attr('x', d => xScale(d.key))
-        .attr('y', d => yScale(d.value))
+        .attr('x', d => xScale(translateVehicleKey(d.key)))
+        .attr('y', chartHeight)
         .attr('width', xScale.bandwidth())
-        .attr('height', d => innerHeight - yScale(d.value))
-        .attr('fill', d => colorScale(d.key));
+        .attr('height', 0)
+        .attr('fill', (d, i) => generateBluePalette(categories.length)[i])
+        .on('mouseover', function (event, d) {
+            d3.select(this).attr('opacity', 0.7);
+            tooltip.style('visibility', 'visible')
+                .html(`<strong>${translateVehicleKey(d.key)}</strong><br/>Registros: ${d.value}`)
+                .style('left', (event.pageX + 10) + 'px')
+                .style('top', (event.pageY - 20) + 'px');
+        })
+        .on('mouseout', function () {
+            d3.select(this).attr('opacity', 1);
+            tooltip.style('visibility', 'hidden');
+        });
 
-    chart.selectAll('.bar-label')
-        .data(dataset)
+    bars.transition()
+        .duration(800)
+        .attr('y', d => yScale(d.value))
+        .attr('height', d => chartHeight - yScale(d.value))
+        .delay((d, i) => i * 100);
+
+    g.selectAll('.bar-value')
+        .data(rawData)
         .join('text')
-        .attr('class', 'bar-label')
-        .attr('x', d => xScale(d.key) + xScale.bandwidth() / 2)
+        .attr('class', 'bar-value')
+        .attr('x', d => xScale(translateVehicleKey(d.key)) + xScale.bandwidth() / 2)
         .attr('y', d => yScale(d.value) - 5)
         .attr('text-anchor', 'middle')
-        .text(d => d.value);
+        .text(d => d.value)
+        .attr('opacity', 0)
+        .transition()
+        .duration(800)
+        .attr('opacity', 1)
+        .delay((d, i) => i * 100);
+
+    const tooltip = d3.select('body').append('div')
+        .attr('class', 'd3-tooltip')
+        .style('position', 'absolute')
+        .style('visibility', 'hidden')
+        .style('background-color', 'rgba(0,0,0,0.8)')
+        .style('color', 'white')
+        .style('padding', '8px')
+        .style('border-radius', '4px')
+        .style('pointer-events', 'none');
 };
 
 onMounted(() => {
@@ -81,43 +123,61 @@ watch(() => props.data, () => {
 </script>
 
 <template>
-    <div class="bar-chart-container">
-        <h5 class="chart-title">Combustíveis Utilizados</h5>
+    <div class="chart-wrapper">
         <svg ref="svgRef"></svg>
     </div>
 </template>
 
 <style scoped>
-.bar-chart-container {
+.chart-wrapper {
     width: 100%;
+    /* GARANTE QUE O WRAPPER OCUPA TODA A LARGURA */
     height: 100%;
-    min-height: 450px;
+    /* GARANTE QUE O WRAPPER OCUPA TODA A ALTURA */
     display: flex;
-    flex-direction: column;
-}
-
-.chart-title {
-    font-weight: 600;
-    margin-bottom: 1rem;
-    text-align: center;
+    /* Para centralizar o SVG */
+    align-items: center;
+    justify-content: center;
+    position: relative;
 }
 
 svg {
     width: 100%;
+    /* O SVG OCUPA 100% DA LARGURA E ALTURA DO WRAPPER */
     height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-:deep(.bar-label) {
-    font-size: 0.8rem;
-    font-weight: 500;
-    fill: #333;
-}
-
+/* Estilos D3 para elementos dentro do SVG */
 :deep(.bar) {
     transition: opacity 0.2s ease-in-out;
 }
 
-:deep(.bar:hover) {
-    opacity: 0.8;
+:deep(.x-axis-label) {
+    font-size: 0.95rem;
+    fill: #555;
+}
+
+:deep(.y-axis-label) {
+    font-size: 0.95rem;
+    fill: #555;
+}
+
+:deep(.axis-label) {
+    font-size: 1rem;
+    font-weight: 500;
+    fill: #333;
+}
+
+:deep(.bar-value) {
+    font-size: 1.1rem;
+    font-weight: 600;
+    fill: #333;
+}
+
+/* Estilo para o tooltip D3 (externo ao SVG) */
+.d3-tooltip {
+    font-size: 0.9rem;
+    line-height: 1.4;
 }
 </style>
