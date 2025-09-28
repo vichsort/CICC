@@ -14,7 +14,7 @@
 
           <div class="mb-3">
             <label for="distance" class="form-label">Distância (km):</label>
-            <input id="distance" v-model="form.distance" type="text" inputmode="decimal" class="form-control"
+            <input id="distance" v-model="form.distance" type="text" inputmode="decimal" class="form-control" maxlength="4"
               required />
             <div v-if="errors.distance" class="form-text text-danger">{{ errors.distance }}</div>
           </div>
