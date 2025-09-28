@@ -4,6 +4,7 @@ Módulo para o registro de emissões de carbono.
 Este módulo define rotas de uma API Flask para o cálculo, armazenamento e consulta
 de registros de emissão de CO₂ provenientes de viagens.
 """
+from math import ceil
 from decimal import Decimal
 from flask import Blueprint, request, jsonify
 from backend.database.database import db
@@ -151,12 +152,19 @@ def get_co2():
         }
     """
     try:
-        co2_records = db.query('SELECT emission_amount FROM public.emission_records;')
-        total_co2 = sum(Decimal(record['emission_amount']) for record in co2_records)
+        co2 = db.query('SELECT emission_amount FROM public.emission_records;')
+        total_co2 = Decimal('0')
+        for record in co2:
+            record['emission_amount'] = Decimal(record['emission_amount'])
+            total_co2 += record['emission_amount']
+
+        trees_per_ton = 7 # Considerando 7 árvores por tonelada de co2 emitido 
+        necessary_trees = ceil((total_co2 * trees_per_ton) / 1000) # ceil() arredonda pra cima, pois não dá pra plantar meia árvore
 
         return jsonify({
+            'records': co2,
             'total_co2': str(total_co2),
-            'records': co2_records
+            'necessary_trees': necessary_trees
         }), 200
     except Exception as e:
         return jsonify({'ok': False, 'message': str(e)}), 500
