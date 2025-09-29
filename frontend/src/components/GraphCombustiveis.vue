@@ -58,7 +58,7 @@ const drawChart = () => {
 
     g.append('text')
         .attr('transform', 'rotate(-90)')
-        .attr('y', 0 - margin.left + 5)
+        .attr('y', 0 - margin.left - 4)
         .attr('x', 0 - (chartHeight / 2))
         .attr('dy', '1em')
         .attr('class', 'axis-label')
@@ -97,7 +97,7 @@ const drawChart = () => {
         .join('text')
         .attr('class', 'bar-value')
         .attr('x', d => xScale(translateVehicleKey(d.key)) + xScale.bandwidth() / 2)
-        .attr('y', d => yScale(d.value) - 5)
+        .attr('y', d => yScale(d.value) - 45)
         .attr('text-anchor', 'middle')
         .text(d => d.value)
         .attr('opacity', 0)
@@ -134,15 +134,17 @@ watch(() => props.data, () => {
 
 <style scoped>
 .chart-wrapper {
-    width: 100%;
-    /* GARANTE QUE O WRAPPER OCUPA TODA A LARGURA */
-    height: 100%;
-    /* GARANTE QUE O WRAPPER OCUPA TODA A ALTURA */
+    width: 90%;
+    /* GARANTE QUE O WRAPPER OCUPE 90% DA LARGURA */
+    min-height: 300px;
+    height: 90%;
+    /* GARANTE QUE O WRAPPER OCUPE 90% DA ALTURA */
     display: flex;
     /* Para centralizar o SVG */
     align-items: center;
     justify-content: center;
     position: relative;
+    margin: auto;
 }
 
 svg {
