@@ -70,7 +70,7 @@ const drawChart = () => {
 
             const infoBox = svg.append('g')
                 .attr('class', 'info-box')
-                .attr('transform', `translate(${width / 2}, ${height - 5})`);
+                .attr('transform', `translate(${width / 2}, ${height - 25})`);
 
             infoBox.append('text')
                 .text(infoText)
