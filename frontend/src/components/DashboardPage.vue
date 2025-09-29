@@ -122,16 +122,20 @@ onMounted(() => {
       <div class="row">
         <div class="col-md-6 mb-3 mb-md-0 px-2">
           <div class="card">
-            <h5 class="chart-title">Veículos Utilizados</h5>
+            <div class="card-body">
+              <h5 class="chart-title">Veículos Utilizados</h5>
+            </div>
             <GraphVeiculos v-if="Object.keys(vehicleData).length > 0" :data="vehicleData" />
-            <div v-else class="card-body text-center d-flex align-items-center justify-content-center">
+            <div v-else class="text-center d-flex align-items-center justify-content-center">
               <p>Nenhum dado de veículo para exibir.</p>
             </div>
           </div>
         </div>
         <div class="col-md-6 px-2">
           <div class="card">
-            <h5 class="chart-title">Combustíveis Utilizados</h5>
+            <div class="card-body">
+              <h5 class="chart-title">Combustíveis Utilizados</h5>
+            </div>
             <FuelBarChart v-if="Object.keys(fuelData).length > 0" :data="fuelData" />
             <div v-else class="card-body text-center d-flex align-items-center justify-content-center">
               <p>Nenhum dado de combustível para exibir.</p>
