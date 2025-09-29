@@ -48,7 +48,11 @@ const drawChart = () => {
         .style('text-anchor', 'end');
 
     g.append('g')
-        .call(d3.axisLeft(yScale).ticks(5).tickFormat(d3.format('d')))
+        .call(
+            d3.axisLeft(yScale)
+            .tickValues(d3.range(0, d3.max(rawData, d => d.value) + 1, 1))
+            .tickFormat(d3.format('d'))
+        )
         .selectAll('text')
         .attr('class', 'y-axis-label');
 

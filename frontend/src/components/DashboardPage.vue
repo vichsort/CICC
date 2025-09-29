@@ -2,10 +2,12 @@
 import { ref, onMounted } from 'vue';
 import GraphVeiculos from './GraphVeiculos.vue';
 import FuelBarChart from './GraphCombustiveis.vue';
+import TreesToCompensate from './TreesToCompensate.vue';
 
 const isLoading = ref(true);
 const error = ref(null);
 const totalCo2 = ref(0);
+const necessaryTrees = ref(0);
 const totalKm = ref(0);
 const vehicleData = ref({});
 const fuelData = ref({});
@@ -51,6 +53,7 @@ async function fetchDashboardData() {
 
     // Atualiza os estados reativos com os dados recebidos
     totalCo2.value = parseFloat(co2Result.total_co2).toFixed(2);
+    necessaryTrees.value = parseInt(co2Result.necessary_trees);
     totalKm.value = parseFloat(kmResult.total_km).toFixed(2);
 
     // Processa os dados de veículos e combustíveis para contagem
@@ -106,7 +109,16 @@ onMounted(() => {
           </div>
         </div>
       </div>
-
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="card card-trees">
+            <TreesToCompensate v-if="Object.keys(vehicleData).length > 0" :data="necessaryTrees" />
+            <div v-else class="card-body text-center d-flex align-items-center justify-content-center">
+              <p>Nenhum dado de compensação para exibir.</p>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="row">
         <div class="col-md-6 mb-3 mb-md-0 px-2">
           <div class="card">
@@ -215,5 +227,9 @@ onMounted(() => {
   font-weight: 600;
   margin-bottom: 0.5rem;
   text-align: center;
+}
+
+.card-trees {
+  min-height: 0px;
 }
 </style>
