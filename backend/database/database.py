@@ -37,11 +37,11 @@ class Database:
         estabelecer futuras conexões.
         """
         self.db_params = {
-            'dbname': os.environ.get('DB_NAME'),
-            'user': os.environ.get('DB_USER'),
-            'password': os.environ.get('DB_PASSWORD'),
-            'host': os.environ.get('DB_HOST'),
-            'port': os.environ.get('DB_PORT')
+            'dbname': 'emissions_db',
+            'user': 'postgres',
+            'password': 'ifc',
+            'host': 'localhost',
+            'port': '5432'
         }
 
     def query(self, query: str, args: tuple = None):

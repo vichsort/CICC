@@ -47,6 +47,15 @@ emission_reference = {
             5: 0.028
         },
     },
+    'car-diesel': {
+        'diesel': {
+            1: 2.5858,
+            2: 1.2929,
+            3: 0.8619,
+            4: 0.6465,
+            5: 0.5172
+        }
+    },
     'motorcycle-standard': {
         'gasoline': {
             1: 0.036,

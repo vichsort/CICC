@@ -25,7 +25,6 @@ def create_emission_record():
 
     JSON Payload (Corpo da Requisição):
         {
-            "person_name": "string",
             "distance": "float",
             "vehicle": "string",
             "vehicle_type": "string | null",
@@ -44,7 +43,6 @@ def create_emission_record():
     """
     data = request.json
 
-    person_name = data.get('person_name')
     distance = data.get('distance')
     people_amount = data.get('people_amount', None)
     vehicle = data.get('vehicle')
@@ -73,10 +71,9 @@ def create_emission_record():
     # O uso de parâmetros (%s) previne ataques de SQL Injection.
     db.query(
         'INSERT INTO public.emission_records ' \
-        '(person_name, emission_amount, distance, people_amount, vehicle, fuel) ' \
-        'VALUES (%s, %s, %s, %s, %s, %s);',
+        '(emission_amount, distance, people_amount, vehicle, fuel) ' \
+        'VALUES (%s, %s, %s, %s, %s);',
         (
-            person_name,
             emission,
             distance,
             people_amount,
@@ -88,7 +85,7 @@ def create_emission_record():
     # Retorna uma resposta JSON de sucesso com status 201.
     return jsonify({
         'ok': True,
-        'message': f'Registro de emissão criado para {person_name}. Emissão calculada: {emission:.2f} kg CO₂.'
+        'message': f'Emissão calculada: {emission:.2f} kg CO₂.'
     }), 201
 
 
@@ -105,7 +102,6 @@ def get_emission_record():
         [
             {
                 "id": 1,
-                "person_name": "João Silva",
                 "emission_amount": "15.75",
                 "distance": "100.00",
                 "people_amount": 1,

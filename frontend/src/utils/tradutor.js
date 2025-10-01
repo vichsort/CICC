@@ -1,8 +1,9 @@
 const vehicleTypeTranslations = {
   'motorcycle-flex': 'Motocicleta Flex',
-  'motorcycle-standard': 'Motocicleta Padrão',
+  'motorcycle-standard': 'Motocicleta à Gasolina',
   'car-flex': 'Carro Flex',
-  'car-standard': 'Carro Padrão',
+  'car-diesel': 'Carro à Diesel',
+  'car-standard': 'Carro à Gasolina',
   'bus-municipal-bus': 'Ônibus Municipal',
   'bus-micro-bus': 'Micro-ônibus',
   'bus-travel-bus': 'Ônibus de Viagem',
