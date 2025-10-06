@@ -12,7 +12,7 @@ const totalKm = ref(0);
 const vehicleData = ref({});
 const fuelData = ref({});
 
-const API_BASE_URL = 'http://127.0.0.1:5000/api/emission';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 /**
  * Função auxiliar para contar a ocorrência de itens em um array de objetos.
