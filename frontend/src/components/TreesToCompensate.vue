@@ -3,7 +3,7 @@
         <img src="../assets/tree.gif">
         <div class="data">
             <span class="number-of-trees">{{ data }}</span>
-            <p>{{ data > 1 ? "árvores" : "árvore" }} para compensar</p>
+            <p>{{ data > 1 ? "Árvores" : "Árvore" }} para compensar</p>
         </div>
     </div>
 

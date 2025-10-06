@@ -85,7 +85,6 @@ Antes de começar, certifique-se de que você tem os seguintes softwares instala
     ```sql
     CREATE TABLE public.emission_records (
         id SERIAL PRIMARY KEY,
-        person_name VARCHAR(255) NOT NULL,
         emission_amount NUMERIC(10, 4) NOT NULL,
         distance NUMERIC(10, 2) NOT NULL,
         people_amount INTEGER,
@@ -134,7 +133,6 @@ Cria um novo registro de emissão com base nos dados da viagem.
 
     ```json
     {
-        "person_name": "João da Silva",
         "distance": 150.5,
         "people_amount": 2,
         "vehicle": "car",

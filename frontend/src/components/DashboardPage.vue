@@ -11,55 +11,30 @@ const necessaryTrees = ref(0);
 const totalKm = ref(0);
 const vehicleData = ref({});
 const fuelData = ref({});
+<<<<<<< HEAD
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+=======
+const API_BASE_URL = 'http://127.0.0.1:5000/api/emission';
+>>>>>>> fd0d3e0fe36125ffd86894a793ec6b0a58ece5ca
 
-/**
- * Função auxiliar para contar a ocorrência de itens em um array de objetos.
- * Ex: [{ vehicle: 'car' }, { vehicle: 'bus' }, { vehicle: 'car' }] -> { car: 2, bus: 1 }
- */
-function countItems(dataArray, key) {
-  return dataArray.reduce((acc, current) => {
-    const item = current[key];
-    acc[item] = (acc[item] || 0) + 1;
-    return acc;
-  }, {});
-}
+function countItems(dataArray, key) { return dataArray.reduce((acc, current) => { const item = current[key]; acc[item] = (acc[item] || 0) + 1; return acc; }, {}); }
 
 async function fetchDashboardData() {
   isLoading.value = true;
   error.value = null;
-
   try {
-    // Dispara todas as requisições em paralelo para maior eficiência
     const responses = await Promise.all([
-      fetch(`${API_BASE_URL}/co2/`),
-      fetch(`${API_BASE_URL}/km/`),
-      fetch(`${API_BASE_URL}/vehicles/`),
-      fetch(`${API_BASE_URL}/fuels/`)
+      fetch(`${API_BASE_URL}/co2/`), fetch(`${API_BASE_URL}/km/`),
+      fetch(`${API_BASE_URL}/vehicles/`), fetch(`${API_BASE_URL}/fuels/`)
     ]);
-
-    // Verifica se todas as respostas foram bem-sucedidas
-    for (const res of responses) {
-      if (!res.ok) {
-        throw new Error('Falha ao buscar um dos recursos da API.');
-      }
-    }
-
-    // Extrai o JSON de todas as respostas
-    const [co2Result, kmResult, vehiclesResult, fuelsResult] = await Promise.all(
-      responses.map(res => res.json())
-    );
-
-    // Atualiza os estados reativos com os dados recebidos
+    for (const res of responses) { if (!res.ok) { throw new Error('Falha ao buscar um dos recursos da API.'); } }
+    const [co2Result, kmResult, vehiclesResult, fuelsResult] = await Promise.all(responses.map(res => res.json()));
     totalCo2.value = parseFloat(co2Result.total_co2).toFixed(2);
     necessaryTrees.value = parseInt(co2Result.necessary_trees);
     totalKm.value = parseFloat(kmResult.total_km).toFixed(2);
-
-    // Processa os dados de veículos e combustíveis para contagem
     vehicleData.value = countItems(vehiclesResult, 'vehicle');
     fuelData.value = countItems(fuelsResult, 'fuel');
-
   } catch (err) {
     console.error('Erro ao buscar dados do dashboard:', err);
     error.value = err.message || 'Não foi possível carregar os dados. Tente novamente mais tarde.';
@@ -68,9 +43,7 @@ async function fetchDashboardData() {
   }
 }
 
-onMounted(() => {
-  fetchDashboardData();
-});
+onMounted(() => { fetchDashboardData(); });
 </script>
 
 <template>
@@ -91,6 +64,13 @@ onMounted(() => {
     <div v-else class="dashboard-wrapper">
       <h1 class="dashboard-title mb-4">Dashboard de Emissões</h1>
 
+      <div class="row mb-5">
+        <div class="col-12">
+          <router-link to="/forms" class="btn btn-primary btn-lg new-record-btn">
+            ＋ Novo Registro
+          </router-link>
+        </div>
+      </div>
       <div class="row mb-4">
         <div class="col-md-6 mb-3 mb-md-0 px-2">
           <div class="card text-center kpi-card minimal-card">
@@ -149,7 +129,6 @@ onMounted(() => {
 
 <style scoped>
 .dashboard-container {
-  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -220,20 +199,32 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   grid-template-rows: unset;
-  padding: 0.5rem; 
+  padding: 0.5rem;
 }
+
 .minimal-card .card-body {
   padding: 0.5rem;
   flex-grow: 1;
 }
 
-.chart-title {
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  text-align: center;
-}
-
 .card-trees {
   min-height: 0px;
+}
+
+.new-record-btn {
+  width: 100%;
+  padding: 1.25rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+  transition: all 0.2s ease-in-out;
+}
+
+.new-record-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
 }
 </style>
