@@ -11,8 +11,12 @@ const necessaryTrees = ref(0);
 const totalKm = ref(0);
 const vehicleData = ref({});
 const fuelData = ref({});
+<<<<<<< HEAD
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+=======
+const API_BASE_URL = 'http://127.0.0.1:5000/api/emission';
+>>>>>>> fd0d3e0fe36125ffd86894a793ec6b0a58ece5ca
 
 function countItems(dataArray, key) { return dataArray.reduce((acc, current) => { const item = current[key]; acc[item] = (acc[item] || 0) + 1; return acc; }, {}); }
 
