@@ -7,8 +7,8 @@ de registros de emissão de CO₂ provenientes de viagens.
 from math import ceil
 from decimal import Decimal
 from flask import Blueprint, request, jsonify
-from app.database.database import db
-from app.utils.emission_calculator import calculate_emission
+from backend.database.database import db
+from backend.utils.emission_calculator import calculate_emission
 
 # Cria um Blueprint do Flask para organizar as rotas de emissão.
 # O prefixo da URL para estas rotas será definido no app principal.

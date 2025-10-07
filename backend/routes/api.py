@@ -1,5 +1,5 @@
 from flask import Blueprint
-from app.routes.emission_record import emission_record
+from backend.routes.emission_record import emission_record
 
 api = Blueprint('api', __name__)
 
