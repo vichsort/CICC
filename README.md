@@ -48,13 +48,13 @@ Antes de começar, certifique-se de que você tem os seguintes softwares instala
 1.  **Clone o repositório:**
 
     ```bash
-    git clone https://github.com/jappejappe/Emissao_de_Carbono_Consorcio.git
+    git clone https://github.com/vichsort/CICC.git
     ```
 
 2.  **Acesse o diretório do backend:**
 
     ```bash
-    cd Emissao_de_Carbono_Consorcio/backend
+    cd CICC/backend
     ```
 
 3.  **Crie e ative o ambiente virtual:**
