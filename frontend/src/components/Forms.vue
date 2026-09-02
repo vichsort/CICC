@@ -99,39 +99,29 @@
 
 <script setup>
 import { reactive, computed } from 'vue';
+import {
+  DISTANCE_RANGES,
+  VEHICLE_CATEGORIES,
+  VEHICLE_TYPES,
+  FUEL_OPTIONS,
+  PEOPLE_LIMITS,
+  resolveFinalFuel
+} from '../constants/emissionOptions';
 
 const emit = defineEmits(['submit']);
-const peopleLimits = { car: 5, motorcycle: 2 };
 
-const distanceRanges = [
-  { text: '0 a 10 km', value: 5 },
-  { text: '11 a 15 km', value: 13 },
-  { text: '16 a 20 km', value: 18 },
-  { text: '21 a 50 km', value: 36 },
-  { text: '51 a 80 km', value: 66 },
-  { text: '81 a 100 km', value: 91 },
-  { text: 'Mais de 100 km', value: 120 },
-];
-
-const vehicleCategories = [
-  { text: 'Carro', value: 'car' },
-  { text: 'Motocicleta', value: 'motorcycle' },
-  { text: 'Ônibus', value: 'bus' },
-];
-
-const vehicleTypes = {
-  car: [ { text: 'Gasolina', value: 'standard' }, { text: 'Flex', value: 'flex' }, { text: 'Diesel', value: 'diesel' } ],
-  motorcycle: [ { text: 'Gasolina', value: 'standard' }, { text: 'Flex', value: 'flex' } ],
-  bus: [ { text: 'Micro-ônibus', value: 'micro-bus' }, { text: 'Ônibus Municipal', value: 'municipal-bus' }, { text: 'Ônibus de Viagem', value: 'travel-bus' } ]
-};
-
-const fuelOptions = {
-  car_flex: [{ text: 'Gasolina', value: 'gasoline' }, { text: 'Etanol', value: 'ethanol' }],
-  motorcycle_flex: [{ text: 'Gasolina', value: 'gasoline' }, { text: 'Etanol', value: 'ethanol' }],
-};
+const distanceRanges = DISTANCE_RANGES;
+const vehicleCategories = VEHICLE_CATEGORIES;
+const vehicleTypes = VEHICLE_TYPES;
+const fuelOptions = FUEL_OPTIONS;
+const peopleLimits = PEOPLE_LIMITS;
 
 const form = reactive({
-  distance: '', vehicle: '', vehicle_type: '', fuel: '', people_amount: null
+  distance: '',
+  vehicle: '',
+  vehicle_type: '',
+  fuel: '',
+  people_amount: null
 });
 
 const errors = reactive({});
@@ -160,17 +150,6 @@ const currentFuels = computed(() => {
   return fuelOptions[key] || [];
 });
 
-function getFinalFuel() {
-    if (form.vehicle_type === 'flex') return form.fuel;
-    if (form.vehicle_type === 'standard') return 'gasoline';
-    if (form.vehicle_type === 'diesel') return 'diesel';
-    if (form.vehicle_type === 'micro-bus') return 'diesel';
-    if (form.vehicle_type === 'municipal-bus') return 'biodiesel';
-    if (form.vehicle_type === 'travel-bus') return 'diesel';
-    return form.fuel; 
-}
-
-
 function validate() {
   Object.keys(errors).forEach(key => delete errors[key]);
   const newErrors = {};
@@ -183,14 +162,13 @@ function validate() {
   return Object.keys(newErrors).length === 0;
 }
 
-
 function onSubmit() {
   if (!validate()) {
     console.error("Validação FALHOU!", errors);
     return;
   }
 
-  const finalFuel = getFinalFuel();
+  const finalFuel = resolveFinalFuel(form.vehicle_type, form.fuel);
 
   const payload = {
     distance: form.distance,

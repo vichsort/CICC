@@ -2,6 +2,8 @@
 import { ref, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import ConsorcioItaForm from './Forms.vue';
+import { emissionApi } from '../services/api';
+import { useInactivityTimeout } from '../composables/useInactivityTimeout';
 
 const router = useRouter();
 const isLoading = ref(false);
@@ -11,23 +13,18 @@ const emissionValue = ref(null);
 
 let closeTimer = null;
 
+// Timer de inatividade de 60 segundos com limpeza automática no desmonte
+useInactivityTimeout(() => {
+  resetAndRedirect();
+}, 60000, formSubmittedSuccessfully);
+
 async function handleSubmit(payload) {
   isLoading.value = true;
   apiResponseMessage.value = '';
   emissionValue.value = null;
 
   try {
-    const response = await fetch('http://127.0.0.1:5000/api/emission/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    const result = await response.json();
-
-    if (!response.ok) {
-      throw new Error(result.message || 'Ocorreu um erro ao enviar os dados.');
-    }
+    const result = await emissionApi.createEmission(payload);
 
     formSubmittedSuccessfully.value = true;
     apiResponseMessage.value = result.message;
@@ -120,7 +117,6 @@ onUnmounted(() => {
 
   to {
     transform: scale(1);
-    opacity: 1;
   }
 }
 

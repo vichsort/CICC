@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from flask import Flask, send_from_directory, jsonify
+from typing import Any
+from flask import Flask, send_from_directory, jsonify, Response
 from flask_cors import CORS
 from backend.routes.api import api
 
@@ -30,11 +31,11 @@ app.register_blueprint(api, url_prefix='/api')
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
-def serve_spa(path: str):
+def serve_spa(path: str) -> Response | Any:
     """
     Serve o aplicativo frontend SPA (Vue).
-    Qualquer rota não pertencente à API é direcionada para o index.html,
-    garantindo compatibilidade com o HTML5 History Mode do Vue Router.
+    Qualquer rota estática existente é servida diretamente;
+    todas as demais rotas são direcionadas para o index.html (Vue Router history mode).
     """
     if FRONTEND_DIST.exists():
         target_file = FRONTEND_DIST / path
@@ -48,6 +49,14 @@ def serve_spa(path: str):
         'message': 'API Flask CICC ativa. Para acessar o frontend, execute "npm run dev" ou gere o build com "npm run build".',
         'api_docs': '/api/emission/'
     }), 200
+
+
+@app.errorhandler(404)
+def handle_404(e: Any) -> Response | Any:
+    """Fallback para 404 garantindo SPA routing em todas as condições."""
+    if FRONTEND_DIST.exists():
+        return send_from_directory(str(FRONTEND_DIST), 'index.html')
+    return jsonify({'ok': False, 'message': 'Recurso não encontrado.'}), 404
 
 
 if __name__ == '__main__':

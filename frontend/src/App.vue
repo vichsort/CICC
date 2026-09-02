@@ -33,6 +33,9 @@ body {
   margin: 0;
   padding: 0;
   height: 100%;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 #app-container {

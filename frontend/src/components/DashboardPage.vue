@@ -1,46 +1,28 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { emissionApi } from '../services/api';
 import GraphVeiculos from './GraphVeiculos.vue';
 import FuelBarChart from './GraphCombustiveis.vue';
 import TreesToCompensate from './TreesToCompensate.vue';
 
 const isLoading = ref(true);
 const error = ref(null);
-const totalCo2 = ref(0);
+const totalCo2 = ref('0');
 const necessaryTrees = ref(0);
-const totalKm = ref(0);
+const totalKm = ref('0');
 const vehicleData = ref({});
 const fuelData = ref({});
-
-const API_BASE_URL = 'http://127.0.0.1:5000/api/emission';
-
-/**
- * Função auxiliar para contar a ocorrência de itens em um array de objetos.
- * Ex: [{ vehicle: 'car' }, { vehicle: 'bus' }, { vehicle: 'car' }] -> { car: 2, bus: 1 }
- */
-function countItems(dataArray, key) {
-  return dataArray.reduce((acc, current) => {
-    const item = current[key];
-    acc[item] = (acc[item] || 0) + 1;
-    return acc;
-  }, {});
-}
 
 async function fetchDashboardData() {
   isLoading.value = true;
   error.value = null;
   try {
-    const responses = await Promise.all([
-      fetch(`${API_BASE_URL}/co2/`), fetch(`${API_BASE_URL}/km/`),
-      fetch(`${API_BASE_URL}/vehicles/`), fetch(`${API_BASE_URL}/fuels/`)
-    ]);
-    for (const res of responses) { if (!res.ok) { throw new Error('Falha ao buscar um dos recursos da API.'); } }
-    const [co2Result, kmResult, vehiclesResult, fuelsResult] = await Promise.all(responses.map(res => res.json()));
-    totalCo2.value = parseFloat(co2Result.total_co2).toFixed(2);
-    necessaryTrees.value = parseInt(co2Result.necessary_trees);
-    totalKm.value = parseFloat(kmResult.total_km).toFixed(2);
-    vehicleData.value = countItems(vehiclesResult, 'vehicle');
-    fuelData.value = countItems(fuelsResult, 'fuel');
+    const data = await emissionApi.getDashboardSummary();
+    totalCo2.value = data.totalCo2;
+    necessaryTrees.value = data.necessaryTrees;
+    totalKm.value = data.totalKm;
+    vehicleData.value = data.vehicleData;
+    fuelData.value = data.fuelData;
   } catch (err) {
     console.error('Erro ao buscar dados do dashboard:', err);
     error.value = err.message || 'Não foi possível carregar os dados. Tente novamente mais tarde.';
@@ -49,7 +31,9 @@ async function fetchDashboardData() {
   }
 }
 
-onMounted(() => { fetchDashboardData(); });
+onMounted(() => {
+  fetchDashboardData();
+});
 </script>
 
 <template>
