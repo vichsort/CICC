@@ -13,6 +13,19 @@ from flask import Flask, send_from_directory, jsonify, Response
 from flask_cors import CORS
 from backend.routes.api import api
 
+try:
+    from dotenv import load_dotenv
+    _root_env: Path = Path(__file__).resolve().parent.parent / '.env'
+    _backend_env: Path = Path(__file__).resolve().parent / '.env'
+    if _root_env.exists():
+        load_dotenv(dotenv_path=_root_env)
+    elif _backend_env.exists():
+        load_dotenv(dotenv_path=_backend_env)
+    else:
+        load_dotenv()
+except ImportError:
+    pass
+
 # Localização da pasta dist gerada pelo build do Vue
 FRONTEND_DIST: Path = Path(__file__).resolve().parent.parent / "frontend" / "dist"
 

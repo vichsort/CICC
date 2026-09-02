@@ -14,7 +14,14 @@ from typing import Any, Dict, List, Optional, Tuple, cast
 
 try:
     from dotenv import load_dotenv
-    load_dotenv()
+    _root_env: Path = Path(__file__).resolve().parent.parent.parent / '.env'
+    _backend_env: Path = Path(__file__).resolve().parent.parent / '.env'
+    if _root_env.exists():
+        load_dotenv(dotenv_path=_root_env)
+    elif _backend_env.exists():
+        load_dotenv(dotenv_path=_backend_env)
+    else:
+        load_dotenv()
 except ImportError:
     pass
 
