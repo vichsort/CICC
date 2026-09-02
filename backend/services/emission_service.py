@@ -1,14 +1,14 @@
 """
 Camada de serviço para gerenciamento e regras de negócio de emissões de carbono.
 
-Este módulo centraliza todas as consultas, cálculos e transformações de dados
-relacionados às emissões de carbono, isolando a camada de banco de dados das
-rotas HTTP e scripts de exportação.
+Totalmente tipado para checagem estrita de tipos (Pylance/Pyright/Mypy/Pydantic).
 """
+
+from __future__ import annotations
 
 from decimal import Decimal
 from math import ceil
-from typing import List, Dict, Any, Optional
+from typing import Any, Dict, List, Optional
 from backend.database.database import db
 
 
@@ -31,7 +31,7 @@ class EmissionService:
         Returns:
             int: Quantidade de linhas afetadas.
         """
-        return db.query(
+        return db.execute(
             "INSERT INTO emission_records "
             "(emission_amount, distance, people_amount, vehicle, fuel) "
             "VALUES (%s, %s, %s, %s, %s);",
@@ -48,7 +48,7 @@ class EmissionService:
         """
         Retorna todos os registros de emissão cadastrados.
         """
-        records = db.query("SELECT * FROM emission_records ORDER BY id_record ASC;")
+        records: List[Dict[str, Any]] = db.query("SELECT * FROM emission_records ORDER BY id_record ASC;")
         return self._normalize_records(records)
 
     def get_co2_summary(self) -> Dict[str, Any]:
@@ -56,19 +56,19 @@ class EmissionService:
         Calcula o total de CO₂ emitido, a lista de emissões e a estimativa
         de árvores necessárias para compensação.
         """
-        records = db.query("SELECT emission_amount FROM emission_records;")
+        records: List[Dict[str, Any]] = db.query("SELECT emission_amount FROM emission_records;")
         
-        total_co2 = Decimal('0')
-        normalized_records = []
+        total_co2: Decimal = Decimal('0')
+        normalized_records: List[Dict[str, str]] = []
 
         for record in records:
-            amount = Decimal(str(record['emission_amount']))
+            amount: Decimal = Decimal(str(record.get('emission_amount', 0)))
             total_co2 += amount
             normalized_records.append({'emission_amount': str(amount)})
 
         # Regra de negócio: 7 árvores por tonelada de CO2 emitido
-        trees_per_ton = 7
-        necessary_trees = ceil((total_co2 * trees_per_ton) / 1000)
+        trees_per_ton: int = 7
+        necessary_trees: int = ceil((total_co2 * Decimal(trees_per_ton)) / Decimal(1000))
 
         return {
             'records': normalized_records,
@@ -76,13 +76,13 @@ class EmissionService:
             'necessary_trees': necessary_trees
         }
 
-    def get_vehicles_summary(self) -> List[Dict[str, str]]:
+    def get_vehicles_summary(self) -> List[Dict[str, Any]]:
         """
         Retorna a lista de veículos registrados.
         """
         return db.query("SELECT vehicle FROM emission_records;")
 
-    def get_fuels_summary(self) -> List[Dict[str, str]]:
+    def get_fuels_summary(self) -> List[Dict[str, Any]]:
         """
         Retorna a lista de combustíveis registrados.
         """
@@ -92,13 +92,13 @@ class EmissionService:
         """
         Calcula a distância total percorrida e a lista de distâncias registradas.
         """
-        records = db.query("SELECT distance FROM emission_records;")
+        records: List[Dict[str, Any]] = db.query("SELECT distance FROM emission_records;")
         
-        total_km = Decimal('0')
-        normalized_records = []
+        total_km: Decimal = Decimal('0')
+        normalized_records: List[Dict[str, str]] = []
 
         for record in records:
-            dist = Decimal(str(record['distance']))
+            dist: Decimal = Decimal(str(record.get('distance', 0)))
             total_km += dist
             normalized_records.append({'distance': str(dist)})
 
@@ -111,7 +111,7 @@ class EmissionService:
         """
         Retorna todos os registros formatados para exportação (CSV / Excel).
         """
-        records = db.query("""
+        records: List[Dict[str, Any]] = db.query("""
             SELECT 
                 id_record,
                 emission_amount,
@@ -130,9 +130,9 @@ class EmissionService:
         Normaliza os tipos de dados (ex: Decimal, float, datas) para garantir
         compatibilidade total com serialização JSON e exportação.
         """
-        normalized = []
+        normalized: List[Dict[str, Any]] = []
         for r in records:
-            item = dict(r)
+            item: Dict[str, Any] = dict(r)
             if 'emission_amount' in item and item['emission_amount'] is not None:
                 item['emission_amount'] = str(item['emission_amount'])
             if 'distance' in item and item['distance'] is not None:
@@ -144,5 +144,4 @@ class EmissionService:
 
 
 # Instância única do serviço
-emission_service = EmissionService()
-
+emission_service: EmissionService = EmissionService()

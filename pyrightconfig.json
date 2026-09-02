@@ -1,0 +1,10 @@
+{
+    "venvPath": ".",
+    "venv": ".venv",
+    "typeCheckingMode": "strict",
+    "include": [
+        "backend"
+    ],
+    "reportMissingTypeStubs": false
+}
+

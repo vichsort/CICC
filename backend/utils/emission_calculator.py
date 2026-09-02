@@ -1,6 +1,15 @@
-# Structure of the reference: vehicle -> fuel -> people_amount -> carbon emission
-# `None` = amount of people is irrelevant
-emission_reference = {
+"""
+Módulo de cálculo de emissão de CO₂ baseado no tipo de veículo, combustível, passageiros e distância.
+Totalmente tipado para análise estrita.
+"""
+
+from __future__ import annotations
+
+from typing import Dict, Optional
+
+# Estrutura de referência: vehicle -> fuel -> people_amount -> fator de emissão (kg CO₂/km)
+# `None` = quantidade de pessoas irrelevante (ex: ônibus)
+emission_reference: Dict[str, Dict[str, Dict[Optional[int], float]]] = {
     'bus-micro-bus': {
         'diesel': {
             None: 0.427
@@ -74,6 +83,24 @@ emission_reference = {
     }
 }
 
-def calculate_emission(vehicle, fuel, people_amount, distance):
-    result = emission_reference[vehicle][fuel][people_amount] * distance
-    return result
+
+def calculate_emission(
+    vehicle: str,
+    fuel: str,
+    people_amount: Optional[int],
+    distance: float
+) -> float:
+    """
+    Calcula a emissão de CO₂ em kg.
+
+    Args:
+        vehicle: Identificador do veículo (ex: 'car-flex', 'bus-municipal-bus').
+        fuel: Tipo do combustível (ex: 'gasoline', 'ethanol', 'diesel').
+        people_amount: Número de passageiros (ou None para ônibus).
+        distance: Distância percorrida em quilômetros.
+
+    Returns:
+        float: Emissão calculada em kg CO₂.
+    """
+    factor: float = emission_reference[vehicle][fuel][people_amount]
+    return float(factor * distance)

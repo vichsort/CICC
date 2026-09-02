@@ -1,14 +1,17 @@
 """
 Módulo de abstração e conexão com o banco de dados.
 
-Este script suporta tanto SQLite (padrão e recomendado para totens/ambientes locais)
-quanto PostgreSQL. Ele gerencia as conexões, simplifica a execução de queries com
-parâmetros seguros e exporta uma instância única `db`.
+Suporta SQLite (padrão com WAL e auto-criação) e PostgreSQL.
+Completamente tipado para compatibilidade com linters estritos (Pylance/Pyright/Mypy).
 """
+
+from __future__ import annotations
 
 import os
 import sqlite3
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, cast
+
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -21,19 +24,19 @@ class Database:
     Handler agnóstico para gerenciar operações com SQLite ou PostgreSQL.
     """
 
-    def __init__(self):
-        self.db_type = os.environ.get('DB_TYPE', 'sqlite').strip().lower()
+    def __init__(self) -> None:
+        self.db_type: str = os.environ.get('DB_TYPE', 'sqlite').strip().lower()
         
         # Caminho padrão para o arquivo SQLite no diretório backend
-        backend_dir = Path(__file__).resolve().parent.parent
-        sqlite_filename = os.environ.get('SQLITE_FILE', 'database.sqlite3')
-        self.sqlite_path = str(backend_dir / sqlite_filename)
+        backend_dir: Path = Path(__file__).resolve().parent.parent
+        sqlite_filename: str = os.environ.get('SQLITE_FILE', 'database.sqlite3')
+        self.sqlite_path: str = str(backend_dir / sqlite_filename)
 
         # Parâmetros para PostgreSQL
-        self.db_params = {
-            'dbname': os.environ.get('DB_NAME'),
-            'user': os.environ.get('DB_USER'),
-            'password': os.environ.get('DB_PASSWORD'),
+        self.db_params: Dict[str, str] = {
+            'dbname': os.environ.get('DB_NAME', 'emissions_db'),
+            'user': os.environ.get('DB_USER', 'postgres'),
+            'password': os.environ.get('DB_PASSWORD', ''),
             'host': os.environ.get('DB_HOST', 'localhost'),
             'port': os.environ.get('DB_PORT', '5432')
         }
@@ -42,16 +45,13 @@ class Database:
         if self.db_type == 'sqlite':
             self._init_sqlite()
 
-    def _init_sqlite(self):
+    def _init_sqlite(self) -> None:
         """
         Inicializa o arquivo SQLite com WAL mode e garante que a tabela exista.
         """
         with sqlite3.connect(self.sqlite_path) as conn:
-            # Habilita WAL (Write-Ahead Logging) para resiliência contra quedas de energia
             conn.execute("PRAGMA journal_mode=WAL;")
             conn.execute("PRAGMA busy_timeout = 5000;")
-            
-            # Garante que a tabela de emissões exista
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS emission_records (
                     id_record INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -65,62 +65,75 @@ class Database:
             """)
             conn.commit()
 
-    def query(self, query_str: str, args: tuple = None):
+    def query(self, query_str: str, args: Optional[Tuple[Any, ...]] = None) -> List[Dict[str, Any]]:
         """
-        Executa uma query SQL no banco configurado (SQLite ou PostgreSQL).
-
-        Args:
-            query_str (str): Query SQL com placeholders '%s'.
-            args (tuple, optional): Tupla de argumentos para a query.
-
-        Returns:
-            list[dict]: Para consultas SELECT, lista de dicionários com as linhas.
-            int: Para INSERT/UPDATE/DELETE, o número de linhas afetadas.
+        Executa uma consulta SELECT e retorna a lista de registros como dicionários.
         """
-        args = args or ()
+        params: Tuple[Any, ...] = args if args is not None else ()
 
         if self.db_type == 'sqlite':
-            return self._query_sqlite(query_str, args)
-        else:
-            return self._query_postgres(query_str, args)
+            return self._query_sqlite_select(query_str, params)
+        return self._query_postgres_select(query_str, params)
 
-    def _query_sqlite(self, query_str: str, args: tuple):
-        """Executa a query usando SQLite."""
-        # Remove eventuais prefixos de schema 'public.' para compatibilidade com SQLite
-        cleaned_query = query_str.replace('public.', '').replace('PUBLIC.', '')
-        
-        # Converte placeholders '%s' do PostgreSQL para '?' do SQLite
-        adapted_query = cleaned_query.replace('%s', '?')
+    def execute(self, query_str: str, args: Optional[Tuple[Any, ...]] = None) -> int:
+        """
+        Executa uma instrução INSERT, UPDATE ou DELETE e retorna a quantidade de linhas afetadas.
+        """
+        params: Tuple[Any, ...] = args if args is not None else ()
 
+        if self.db_type == 'sqlite':
+            return self._query_sqlite_execute(query_str, params)
+        return self._query_postgres_execute(query_str, params)
+
+    def _clean_sqlite_query(self, query_str: str) -> str:
+        """Remove referências a 'public.' e converte '%s' para '?'."""
+        return query_str.replace('public.', '').replace('PUBLIC.', '').replace('%s', '?')
+
+    def _query_sqlite_select(self, query_str: str, args: Tuple[Any, ...]) -> List[Dict[str, Any]]:
+        adapted_query: str = self._clean_sqlite_query(query_str)
         with sqlite3.connect(self.sqlite_path) as conn:
             conn.row_factory = sqlite3.Row
-            cursor = conn.cursor()
+            cursor: sqlite3.Cursor = conn.cursor()
             cursor.execute(adapted_query, args)
+            rows: List[sqlite3.Row] = cursor.fetchall()
+            return [dict(row) for row in rows]
 
-            stripped = adapted_query.strip().lower()
-            if stripped.startswith('select'):
-                rows = cursor.fetchall()
-                # Converte cada linha sqlite3.Row em dicionário comum
-                return [dict(row) for row in rows]
-            else:
-                conn.commit()
-                return cursor.rowcount
+    def _query_sqlite_execute(self, query_str: str, args: Tuple[Any, ...]) -> int:
+        adapted_query: str = self._clean_sqlite_query(query_str)
+        with sqlite3.connect(self.sqlite_path) as conn:
+            cursor: sqlite3.Cursor = conn.cursor()
+            cursor.execute(adapted_query, args)
+            conn.commit()
+            return cursor.rowcount
 
-    def _query_postgres(self, query_str: str, args: tuple):
-        """Executa a query usando PostgreSQL via psycopg."""
+    def _get_postgres_conninfo(self) -> str:
+        user = self.db_params.get('user', 'postgres')
+        password = self.db_params.get('password', '')
+        host = self.db_params.get('host', 'localhost')
+        port = self.db_params.get('port', '5432')
+        dbname = self.db_params.get('dbname', 'emissions_db')
+        return f"postgresql://{user}:{password}@{host}:{port}/{dbname}"
+
+    def _query_postgres_select(self, query_str: str, args: Tuple[Any, ...]) -> List[Dict[str, Any]]:
         import psycopg
         from psycopg.rows import dict_row
 
-        with psycopg.connect(**self.db_params, row_factory=dict_row) as conn:
+        psycopg_module: Any = cast(Any, psycopg)
+        with psycopg_module.connect(self._get_postgres_conninfo(), row_factory=dict_row) as conn:
             with conn.cursor() as cursor:
                 cursor.execute(query_str, args)
+                rows: List[Any] = cursor.fetchall()
+                return [dict(r) for r in rows]
 
-                stripped = query_str.strip().lower()
-                if stripped.startswith('select'):
-                    return cursor.fetchall()
-                else:
-                    return cursor.rowcount
+    def _query_postgres_execute(self, query_str: str, args: Tuple[Any, ...]) -> int:
+        import psycopg
+
+        psycopg_module: Any = cast(Any, psycopg)
+        with psycopg_module.connect(self._get_postgres_conninfo()) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(query_str, args)
+                return int(cursor.rowcount)
 
 
 # Instância única da classe Database
-db = Database()
+db: Database = Database()
