@@ -1,264 +1,175 @@
+# Calculadora de Emissão de Carbono - Consórcio Itá (CICC)
 
-# Calculadora de Emissão de Carbono - Consórcio Itá
+Sistema interativo para totens de autoatendimento e painéis informativos para cálculo, registro e visualização de emissões de dióxido de carbono (CO₂) geradas a partir de viagens.
+
+---
 
 ## 📝 Sumário
 
-  * [Sobre o Projeto](https://www.google.com/search?q=%23-sobre-o-projeto)
-  * [✨ Funcionalidades](https://www.google.com/search?q=%23-funcionalidades)
-  * [🛠️ Tecnologias Utilizadas](https://www.google.com/search?q=%23%EF%B8%8F-tecnologias-utilizadas)
-  * [🚀 Começando](https://www.google.com/search?q=%23-come%C3%A7ando)
-      * [Pré-requisitos](https://www.google.com/search?q=%23pr%C3%A9-requisitos)
-      * [Instalação](https://www.google.com/search?q=%23instala%C3%A7%C3%A3o)
-      * [Configuração do Banco de Dados](https://www.google.com/search?q=%23configura%C3%A7%C3%A3o-do-banco-de-dados)
-      * [Executando a Aplicação](https://www.google.com/search?q=%23executando-a-aplica%C3%A7%C3%A3o)
-  * [🔌 Uso da API](https://www.google.com/search?q=%23-uso-da-api)
+- [Visão Geral](#-visão-geral)
+- [Funcionalidades Principais](#-funcionalidades-principais)
+- [Tecnologias Utilizadas](#-tecnologias-utilizadas)
+- [Como Executar](#-como-executar)
+  - [1. Modo Totem / Produção (Recomendado para Quiosques)](#1-modo-totem--produção-recomendado-para-quiosques)
+  - [2. Modo Desenvolvimento](#2-modo-desenvolvimento)
+- [Configuração do Banco de Dados](#-configuração-do-banco-de-dados)
+  - [SQLite (Padrão, Sem Servidor)](#sqlite-padrão-sem-servidor)
+  - [PostgreSQL (Opcional)](#postgresql-opcional)
+- [Exportação de Dados](#-exportação-de-dados)
+- [Endpoints da API REST](#-endpoints-da-api-rest)
 
-## 📖 Sobre o Projeto
+---
 
-Este projeto consiste em uma API RESTful desenvolvida para calcular e registrar a emissão de dióxido de carbono (CO₂) gerada a partir de viagens. A aplicação recebe dados como distância, tipo de veículo, combustível e número de passageiros, calcula a emissão correspondente e armazena o registro em um banco de dados para futuras análises.
+## 📖 Visão Geral
 
-## ✨ Funcionalidades
+Este projeto foi otimizado para rodar de forma ultraleve e resiliente em **totens de autoatendimento físicos** (mesmo com hardware modesto, como mini-PCs com 2GB/4GB de RAM rodando Windows ou Linux).
 
-  - [x] **Cálculo de Emissão:** Lógica para calcular a emissão de CO₂ com base em diferentes parâmetros.
-  - [x] **API para Registro:** Endpoint `POST` para receber os dados e criar um novo registro de emissão.
-  - [x] **Persistência de Dados:** Integração com banco de dados PostgreSQL para armazenar os registros.
-  - [x] **Estrutura Modular:** Uso de Blueprints do Flask para organizar as rotas de forma escalável.
+O backend em **Flask** serve diretamente a aplicação SPA compilada em **Vue 3**, e o servidor WSGI de produção **Waitress** gerencia as requisições de forma multithreaded e estável, **dispensando o uso de Docker ou Node.js na máquina final**.
+
+---
+
+## ✨ Funcionalidades Principais
+
+- **Cálculo Preciso de CO₂:** Baseado em fatores de emissão oficiais por veículo (carro, moto, ônibus), tipo de combustível e número de passageiros.
+- **Dashboard em Tempo Real:** Visualização gráfica com métricas de CO₂ acumulado, distância total percorrida e estimativa de árvores necessárias para compensação ecológica.
+- **Banco de Dados Híbrido:** Suporte automático para **SQLite** nativo (com modo WAL contra quedas de energia) ou **PostgreSQL**.
+- **UX Adaptada para Totem:**
+  - Timer de inatividade de 60 segundos (auto-reset se o usuário abandonar a tela).
+  - Bloqueio de seleções indesejadas de texto para telas sensíveis ao toque.
+  - Modo Quiosque nativo em tela cheia com Microsoft Edge ou Google Chrome.
+- **Exportação Tripla de Dados:**
+  - **Na tela:** 5 toques rápidos na logo do Consórcio Itá abrem o modal com senha/PIN para download direto do CSV.
+  - **Via Script CLI:** `python backend/export_emissions.py` gera a planilha em 1 clique na pasta Documentos.
+  - **Via Rede:** Endpoint HTTP protegido por PIN para download remoto via navegador.
+
+---
 
 ## 🛠️ Tecnologias Utilizadas
 
-  * **Backend:** Python 3, Flask
-  * **Banco de Dados:** PostgreSQL
-  * **Gerenciador de Pacotes:** PIP
-  * **Ambiente Virtual:** venv
+- **Frontend:** Vue 3, Vite, Vue Router (HTML5 History Mode), Bootstrap 5, D3.js.
+- **Backend:** Python 3.10+, Flask, Waitress (WSGI de Produção), Pydantic (validação estrita), SQLite3 / Psycopg.
 
-## 🚀 Começando
+---
 
-Siga as instruções abaixo para configurar e executar o projeto em seu ambiente local.
+## 🚀 Como Executar
 
 ### Pré-requisitos
+- [Python 3.10+](https://www.python.org/downloads/)
+- [Node.js 18+](https://nodejs.org/) *(Apenas para compilar o frontend no ambiente de desenvolvimento)*
 
-Antes de começar, certifique-se de que você tem os seguintes softwares instalados:
-
-  * [Python 3.8+](https://www.python.org/downloads/)
-  * [Git](https://git-scm.com/)
-  * [PostgreSQL](https://www.postgresql.org/download/) (ou um container Docker com a imagem do Postgres)
-
-### Instalação
-
-1.  **Clone o repositório:**
-
-    ```bash
-    git clone https://github.com/vichsort/CICC.git
-    ```
-
-2.  **Acesse o diretório do backend:**
-
-    ```bash
-    cd CICC/backend
-    ```
-
-3.  **Crie e ative o ambiente virtual:**
-
-      * No **Windows**:
-        ```bash
-        py -3 -m venv .venv
-        .venv\Scripts\activate
-        ```
-      * No **Linux/Mac**:
-        ```bash
-        python3 -m venv .venv
-        source .venv/bin/activate
-        ```
-
-4.  **Instale as dependências:**
-
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-### Configuração do Banco de Dados
-
-1.  **Crie um banco de dados** no PostgreSQL para a aplicação (ex: `emissions_db`).
-
-2.  **Crie a tabela `emission_records`**. Execute o seguinte comando SQL no seu banco de dados:
-
-    ```sql
-    CREATE TABLE public.emission_records (
-        id SERIAL PRIMARY KEY,
-        emission_amount NUMERIC(10, 4) NOT NULL,
-        distance NUMERIC(10, 2) NOT NULL,
-        people_amount INTEGER,
-        vehicle VARCHAR(100),
-        fuel VARCHAR(100),
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    );
-    ```
-
-3.  **Configure as variáveis de ambiente.** Crie um arquivo chamado `.env` na pasta `backend` e adicione as credenciais do seu banco de dados.
-
-    ```ini
-    # .env
-    DB_HOST=localhost
-    DB_PORT=5432
-    DB_NAME=emissions_db
-    DB_USER=seu_usuario_postgres
-    DB_PASSWORD=sua_senha_postgres
-    ```
-
-    > **Atenção:** O código da sua aplicação precisa ser ajustado para ler essas variáveis de ambiente (usando bibliotecas como `python-dotenv`).
-
-### Executando a Aplicação
-
-Com o ambiente virtual ativado, inicie o servidor Flask:
-
+### Instalação Inicial
 ```bash
-flask run
+# 1. Clone o repositório
+git clone https://github.com/vichsort/CICC.git
+cd CICC
+
+# 2. Crie e ative o ambiente virtual
+python3 -m venv .venv
+
+# No Windows:
+.venv\Scripts\activate
+# No Linux/Mac:
+source .venv/bin/activate
+
+# 3. Instale as dependências do backend
+pip install -r backend/requirements.txt
+
+# 4. Compile o frontend para produção
+npm --prefix frontend install
+npm --prefix frontend run build
 ```
 
-A API estará disponível em `http://127.0.0.1:5000`.
+---
 
-## 🔌 Uso da API
+### 1. Modo Totem / Produção (Recomendado para Quiosques)
 
-A API possui um endpoint principal para criar registros de emissão.
+#### No Windows:
+Dê dois cliques no arquivo **`start.bat`**.
+* Ele inicia o servidor com Waitress e abre o Microsoft Edge em tela cheia no modo quiosque (`--kiosk http://localhost:5000`).
 
-### Criar Registro de Emissão
+#### No Linux:
+Execute o script:
+```bash
+./start.sh
+```
 
-Cria um novo registro de emissão com base nos dados da viagem.
+---
 
-  - **Endpoint:** `POST /api/emission/`
+### 2. Modo Desenvolvimento
 
-  - **Método:** `POST`
+Para trabalhar no código com hot-reload no Vue e auto-reload no Flask:
 
-  - **Corpo da Requisição (JSON):**
+#### No Windows:
+Dê dois cliques no arquivo **`dev.bat`**.
 
-    ```json
-    {
-        "distance": 150.5,
-        "people_amount": 2,
-        "vehicle": "car",
-        "fuel": "gasoline",
-        "vehicle_type": "standard"
-    }
-    ```
+#### Manualmente:
+```bash
+# Terminal 1 - Backend:
+flask --app backend.app run --debug --port 5000
 
-  - **Resposta de Sucesso (Código `201 Created`):**
+# Terminal 2 - Frontend:
+npm --prefix frontend run dev
+```
 
-    ```json
-    {
-        "ok": true,
-        "message": "Registro de emissão criado para João da Silva. Emissão calculada: 35.82 kg CO₂."
-    }
-    ```
+---
 
-  <br>
+## 🗄️ Configuração do Banco de Dados
 
-  - **Endpoint:** `GET /api/emission/`
+Copie o arquivo `.env.example` para `.env`:
+```bash
+cp .env.example .env
+```
 
-  - **Método:** `GET`
+### SQLite (Padrão, Sem Servidor)
+Configuração padrão recomendada para totens:
+```ini
+DB_TYPE=sqlite
+SQLITE_FILE=database.sqlite3
+```
+*Não requer instalação de nenhum serviço. O arquivo é criado e gerenciado automaticamente na pasta `backend/`.*
 
-  - **Resposta de Sucesso (Código `200 OK`):**
+### PostgreSQL (Opcional)
+Se desejar conectar a uma instância externa do PostgreSQL:
+```ini
+DB_TYPE=postgres
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=emissions_db
+DB_USER=postgres
+DB_PASSWORD=sua_senha
+```
 
-    ```json
-    [
-      {
-        "distance": "23.00",
-        "emission_amount": "0.585",
-        "fuel": "gasoline",
-        "id_record": 4,
-        "people_amount": 3,
-        "person_name": "Gabriel",
-        "vehicle": "car-standard"
-      },
-      {
-        "distance": "11.00",
-        "emission_amount": "0.198",
-        "fuel": "gasoline",
-        "id_record": 5,
-        "people_amount": 2,
-        "person_name": "Maria",
-        "vehicle": "motorcycle-standard"
-      }
-    ]
-    ```
+---
 
-  <br>
+## 📊 Exportação de Dados
 
-  - **Endpoint:** `GET /api/emission/co2/`
+1. **Na Interface do Totem (Easter Egg):** Dê 5 toques rápidos na logo do *Consórcio Itá* no rodapé. Digite o PIN configurado (`ADMIN_PIN`, padrão `1234`) e clique em **"Baixar Relatório (CSV)"**.
+2. **Via Script no Terminal:**
+   ```bash
+   python backend/export_emissions.py
+   ```
+   *Gera o arquivo `emissions_AAAA-MM-DD.csv` pronto para abrir no Excel com acentuação UTF-8.*
+3. **Via Navegador pela Rede:**
+   Acesse: `http://<IP-DO-TOTEM>:5000/api/emission/export?pin=1234`
 
-  - **Método:** `GET`
+---
 
-  - **Resposta de Sucesso (Código `200 OK`):**
+## 🔌 Endpoints da API REST
 
-    ```json
-    {
-      "records": [
-        {
-          "emission_amount": "0.585"
-        },
-        {
-          "emission_amount": "0.198"
-        }
-      ],
-      "total_co2": "0.783"
-    }
-    ```
+| Método | Endpoint | Descrição |
+| :--- | :--- | :--- |
+| `POST` | `/api/emission/` | Registra uma nova emissão de CO₂ |
+| `GET` | `/api/emission/` | Lista todos os registros de emissão |
+| `GET` | `/api/emission/co2/` | Retorna total de CO₂ emitido e árvores necessárias |
+| `GET` | `/api/emission/km/` | Retorna total de quilômetros registrados |
+| `GET` | `/api/emission/vehicles/` | Lista veículos registrados |
+| `GET` | `/api/emission/fuels/` | Lista combustíveis registrados |
+| `POST` | `/api/emission/verify-pin` | Valida o PIN de administração |
+| `GET` | `/api/emission/export` | Download do relatório CSV (requer `?pin=...`) |
 
-  <br>
+---
 
-  - **Endpoint:** `GET /api/emission/vehicles/`
+## 👥 Realização e Desenvolvedores
 
-  - **Método:** `GET`
-
-  - **Resposta de Sucesso (Código `200 OK`):**
-
-    ```json
-    [
-      {
-        "vehicle": "car-standard"
-      },
-      {
-        "vehicle": "motorcycle-flex"
-      }
-    ]
-    ```
-
-  <br>
-
-  - **Endpoint:** `GET /api/emission/fuels/`
-
-  - **Método:** `GET`
-
-  - **Resposta de Sucesso (Código `200 OK`):**
-
-    ```json
-    [
-      {
-        "fuel": "gasoline"
-      },
-      {
-        "fuel": "diesel"
-      }
-    ]
-    ```
-
-  <br>
-
-  - **Endpoint:** `GET /api/emission/km/`
-
-  - **Método:** `GET`
-
-  - **Resposta de Sucesso (Código `200 OK`):**
-
-    ```json
-    {
-      "records": [
-        {
-          "distance": "23.00"
-        },
-        {
-          "distance": "11.00"
-        }
-      ],
-      "total_km": "34.00"
-    }
-    ```
+* **Realização:** Consórcio Itá & Instituto Federal Catarinense (IFC)
+* **Desenvolvedores:** Gabriel Moura Jappe, Gustavo Schwitzki Peretti, Vitor Marcelo Mignoni, Heitor Scalco Neto
