@@ -4,10 +4,10 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img src="frontend/src/assets/ifc.png" alt="IFC Logo" height="75" />
 
-# CICC — Calculadora de Impacto de Carbono
+# CICC — Carbon Impact Calculator
 
-**Totem interativo e inteligente para conscientização ecológica e cálculo de pegada de carbono.**  
-Calculando emissões de viagens e transformando dados em ações de reflorestamento.
+**Interactive kiosk system for ecological awareness and carbon footprint calculation.**  
+Tracking commute emissions and translating raw data into reforestation targets.
 
 [![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
 [![Flask](https://img.shields.io/badge/Flask-3.1-000000?style=flat-square&logo=flask&logoColor=white)](https://flask.palletsprojects.com)
@@ -22,211 +22,233 @@ Calculando emissões de viagens e transformando dados em ações de reflorestame
 ---
 
 <div align="center">
-  <video src="assets/cicc_record.mp4" width="90%" autoplay loop muted playsinline></video>
+  <img src="assets/cicc_record.gif" alt="CICC Demo Preview" width="90%" />
 </div>
 
 ---
 
-## Sobre o projeto
+## Overview
 
-O **CICC (Calculadora de Impacto de Carbono)** é um sistema interativo desenvolvido para rodar em **totens físicos de autoatendimento** e quiosques informativos. Fruto da parceria entre o **Consórcio Itá** e o **Instituto Federal Catarinense (IFC - Campus Concórdia)**, o projeto busca sensibilizar a população sobre o impacto ambiental de seus deslocamentos diários.
+**CICC (Calculadora de Impacto de Carbono)** is an interactive application engineered for **standalone self-service kiosks** and informational displays. Developed in partnership between **Consórcio Itá** and **Instituto Federal Catarinense (IFC - Campus Concórdia)**, the system visualizes the direct environmental impact of daily commutes.
 
-Ao registrar uma viagem, a aplicação calcula instantaneamente a quantidade de dióxido de carbono ($CO_2$) emitida com base em fatores de emissão oficiais por tipo de veículo, combustível e quantidade de passageiros. O sistema consolida esses dados em um painel em tempo real e calcula a estimativa de **árvores necessárias para compensar as emissões** (considerando a métrica de 7 árvores por tonelada de $CO_2$).
+Upon logging a trip, the engine calculates carbon dioxide ($CO_2$) emissions using official conversion factors cross-referenced by vehicle category, engine/fuel type, and passenger occupancy. Aggregated entries populate a live analytics dashboard that projects the **reforestation offset requirement** (calibrated at 7 trees per metric ton of $CO_2$).
 
-Projetado para operar com **estabilidade total e consumo mínimo de recursos**, o sistema dispensa Docker e serviços pesados no hardware do totem, iniciando em menos de 3 segundos após uma queda de energia.
+Engineered for **operational fault tolerance and low resource footprints**, the kiosk runs without Docker or heavy background daemons, recovering into ready state in under 3 seconds following a power cycle.
 
-### Funcionalidades
+### Key Features
 
-- **Cálculo Preciso de Emissões:** Lógica parametrizada por categoria (carro, moto, ônibus), tipo de motor (standard, flex, diesel) e ocupação do veículo.
-- **Dashboard Dinâmico em Tempo Real:** Visualização gráfica com métricas de $CO_2$ acumulado, quilometragem total e gráficos interativos com D3.js.
-- **Compensação Ecológica:** Estimativa automática de árvores necessárias para neutralização do carbono.
-- **Modo Quiosque / Totem Nativo:** Execução em tela cheia via Microsoft Edge ou Google Chrome sem barras de navegação ou atalhos indesejados.
-- **Timer de Inatividade Inteligente:** Reset automático do formulário após 60 segundos de inatividade, retornando à tela inicial.
-- **Banco de Dados Híbrido:** Suporte automático para **SQLite** nativo (com modo WAL contra quedas de energia) ou **PostgreSQL**.
-- **Exportação Tripla de Dados:**
-  - **Easter Egg na UI:** 5 toques rápidos na logo do Consórcio Itá no rodapé abrem um modal com PIN para download direto do CSV.
-  - **Via Script CLI:** `python backend/export_emissions.py` gera o arquivo formatado para Excel em 1 clique.
-  - **Via Rede:** Endpoint HTTP protegido por PIN para download remoto por outros dispositivos da rede local.
+* **Parameterized Emission Calculations:** Dynamic mathematical calculations accounting for category (car, motorcycle, bus), fuel type (flex, standard gasoline, ethanol, diesel), and vehicle occupancy.
+* **Real-Time Analytics Dashboard:** Instant visualization of cumulative $CO_2$, total distance logged, and interactive data charts driven by D3.js.
+* **Ecological Offset Projections:** Real-time tree count estimation required to neutralize aggregate emissions.
+* **Native Kiosk Execution:** Full-screen execution scripts for Chromium-based runtimes (Edge/Chrome) with touch optimization, disabled shortcut escape vectors, and no browser UI chroming.
+* **Inactivity Auto-Reset:** State resets after 60 seconds of idle time, recycling the view back to the welcome interface.
+* **Hybrid Storage Architecture:** Toggle between lightweight embedded **SQLite** (configured with WAL mode for write safety against unexpected power loss) and **PostgreSQL**.
+* **Triple-Vector Data Export:**
+  * **On-Screen Secret Trigger:** Tapping the Consórcio Itá footer logo 5 consecutive times invokes a PIN-gated CSV download modal.
+  * **Standalone CLI Script:** Dedicated tool (`python backend/export_emissions.py`) to extract localized CSV sheets directly on disk.
+  * **Local Network Endpoint:** Secure PIN-authenticated HTTP endpoint for remote administration over LAN.
 
 ---
 
-## Arquitetura
+## System Architecture
 
-O projeto adota uma arquitetura em camadas desacopladas (**Controller -> Service -> Database Adapter**), isolando as regras de negócio e persistência de dados das rotas HTTP e do frontend.
+The codebase follows a clean layered structure (**Controller -> Service -> Database Adapter**), separating business validation and storage drivers from HTTP routing and UI components.
+
 
 ```
+
 CICC/
-├── assets/                  # Mídias e vídeos de demonstração
+├── assets/                  # Demonstration media and visual assets
 │   └── cicc_record.mp4
-├── backend/                 # API RESTful Flask & Serviços
-│   ├── database/            # Conector agnóstico (SQLite WAL + PostgreSQL)
-│   ├── services/            # Regras de negócio, cálculos e queries (EmissionService)
-│   ├── schemas/             # Schemas Pydantic para validação estrita
-│   ├── routes/              # Controllers RESTful (Flask Blueprints)
-│   ├── utils/               # Calculadora matemática de fatores de CO₂
-│   ├── export_emissions.py  # Script CLI autônomo para exportação CSV
-│   └── server.py            # Servidor WSGI de produção (Waitress)
-├── frontend/                # Interface SPA em Vue 3 + Vite
+├── backend/                 # Flask RESTful service layer
+│   ├── database/            # Database engine adapters (SQLite WAL / PostgreSQL)
+│   ├── services/            # Domain logic and analytics aggregations (EmissionService)
+│   ├── schemas/             # Pydantic schemas for data integrity and input validation
+│   ├── routes/              # Modular REST controllers (Flask Blueprints)
+│   ├── utils/               # CO₂ emission factors mathematical engine
+│   ├── export_emissions.py  # Standalone CSV extraction CLI utility
+│   └── server.py            # Multithreaded production WSGI entrypoint (Waitress)
+├── frontend/                # Vue 3 SPA client
 │   ├── src/
-│   │   ├── components/      # Telas (Dashboard, Formulário, Gráficos D3, Footer)
-│   │   ├── services/        # Cliente HTTP centralizado (API Client)
-│   │   ├── constants/       # Opções e categorias de emissão
-│   │   └── composables/     # useInactivityTimeout para totens
-│   └── dist/                # Build estático servido pelo Flask
-├── start.bat                # 1-Clique p/ Totem no Windows (Waitress + Edge Kiosk)
-├── dev.bat                  # Modo desenvolvimento local (Flask + Vite)
-├── start.sh                 # 1-Clique p/ Linux
-└── .env.example             # Modelo de configuração de ambiente
+│   │   ├── components/      # UI components (Dashboard, Form, D3 Charts, Footer)
+│   │   ├── services/        # Centralized HTTP abstraction layer
+│   │   ├── constants/       # Categorical definitions and conversion coefficients
+│   │   └── composables/     # Touch kiosk composables (useInactivityTimeout)
+│   └── dist/                # Production static assets served by Flask
+├── start.bat                # 1-Click production launch for Windows (Waitress + Edge Kiosk)
+├── dev.bat                  # Local dual-process development runner (Flask + Vite)
+├── start.sh                 # 1-Click production launch for Linux
+└── .env.example             # Environment configuration baseline
+
 ```
 
 ---
 
-## Stack Tecnológica
+## Tech Stack
 
-| Camada | Tecnologia | Descrição |
+| Layer | Technology | Purpose |
 |---|---|---|
-| **Frontend Framework** | Vue.js 3 (Composition API) | Interface reativa e componentes modulares |
-| **Frontend Build Tool** | Vite 7 | Bundler ultrarrápido com hot-reload |
-| **Gráficos & Visualização** | D3.js v7 | Renderização de gráficos de pizza e barras |
-| **Estilização** | Bootstrap 5 + CSS Scoped | Design responsivo adaptado para toque |
-| **Backend Framework** | Python 3.12 + Flask 3.1 | API RESTful e servidor de arquivos SPA |
-| **Servidor de Produção** | Waitress 3.0 | WSGI multithreaded leve para Windows/Linux |
-| **Validação de Tipos** | Pydantic v2 + Pyright | Validação estrita de contratos de dados |
-| **Banco de Dados (Padrão)** | SQLite 3 (Modo WAL) | Banco local embutido sem necessidade de servidor |
-| **Banco de Dados (Opcional)**| PostgreSQL 16 via Psycopg 3 | Conexão para instâncias corporativas externas |
+| **Frontend Framework** | Vue.js 3 (Composition API) | Reactive single-page application and modular interface |
+| **Frontend Build Tool** | Vite 7 | Fast module bundler and local HMR runtime |
+| **Data Visualization** | D3.js v7 | Custom interactive pie, donut, and bar chart generation |
+| **Styling** | Bootstrap 5 + Scoped CSS | Touch-first responsive layouts and presentation components |
+| **Backend Framework** | Python 3.12 + Flask 3.1 | RESTful API endpoints and static SPA delivery |
+| **Production WSGI** | Waitress 3.0 | Multithreaded, pure-Python WSGI server for Windows/Linux |
+| **Validation Engine** | Pydantic v2 + Pyright | Strict runtime input validation and static typing |
+| **Default Storage** | SQLite 3 (WAL Mode) | Embedded database engine with high concurrency protection |
+| **Enterprise Storage** | PostgreSQL 16 via Psycopg 3 | Optional relational driver for remote infrastructure |
 
 ---
 
-## Como Executar
+## Getting Started
 
-### Pré-requisitos
-- [Python 3.10+](https://python.org)
-- [Node.js 18+](https://nodejs.org) *(Necessário apenas para compilar o frontend)*
+### Prerequisites
+* [Python 3.10+](https://python.org)
+* [Node.js 18+](https://nodejs.org) *(Build dependency only)*
 
 ---
 
-### Instalação
+### Installation
 
-#### 1. Clone o repositório
+#### 1. Clone the repository
 ```bash
-git clone https://github.com/vichsort/CICC.git
+git clone [https://github.com/vichsort/CICC.git](https://github.com/vichsort/CICC.git)
 cd CICC
+
 ```
 
-#### 2. Crie e ative o ambiente virtual
+#### 2. Configure the virtual environment
+
 ```bash
 python3 -m venv .venv
 
-# No Windows:
+# On Windows:
 .venv\Scripts\activate
 
-# No Linux/Mac:
+# On Linux/macOS:
 source .venv/bin/activate
+
 ```
 
-#### 3. Instale as dependências
+#### 3. Install backend dependencies
+
 ```bash
 pip install -r backend/requirements.txt
+
 ```
 
-#### 4. Compile o frontend para produção
+#### 4. Compile the frontend client
+
 ```bash
 npm --prefix frontend install
 npm --prefix frontend run build
+
 ```
 
 ---
 
-### Executando a Aplicação
+### Running the Application
 
-#### 1. Modo Totem / Produção (Recomendado para Quiosques)
+#### 1. Kiosk / Production Mode (Recommended)
 
-* **No Windows:** Dê dois cliques no arquivo **`start.bat`**.  
-  *O script ativa o ambiente virtual, inicia o backend com Waitress em segundo plano e abre o Microsoft Edge automaticamente em tela cheia (`--kiosk`).*
-* **No Linux:** Execute:
-  ```bash
-  ./start.sh
-  ```
+* **Windows:** Double-click **`start.bat`**.
+*Launches the Waitress WSGI process in the background, spins up the application server, and initiates Microsoft Edge in full-screen (`--kiosk`) mode.*
+* **Linux:** Run the shell launcher:
+```bash
+chmod +x start.sh
+./start.sh
 
-#### 2. Modo Desenvolvimento (com Hot-Reload)
+```
 
-* **No Windows:** Dê dois cliques no arquivo **`dev.bat`**.
-* **Manualmente (Linux/Mac/Windows):**
-  ```bash
-  # Terminal 1 - Backend:
-  flask --app backend.app run --debug --port 5000
 
-  # Terminal 2 - Frontend:
-  npm --prefix frontend run dev
-  ```
+
+#### 2. Development Mode (Hot-Reload)
+
+* **Windows:** Double-click **`dev.bat`**.
+* **Manual Setup (Cross-Platform):**
+```bash
+# Terminal 1 - Backend:
+flask --app backend.app run --debug --port 5000
+
+# Terminal 2 - Frontend:
+npm --prefix frontend run dev
+
+```
+
+
 
 ---
 
-## Variáveis de Ambiente
+## Environment Configuration
 
-Copie o arquivo `.env.example` para `.env`:
+Copy the baseline template to initialize your configuration:
+
 ```bash
 cp .env.example .env
+
 ```
 
-| Variável | Padrão | Descrição |
-|---|---|---|
-| `DB_TYPE` | `sqlite` | Tipo de banco de dados (`sqlite` ou `postgres`) |
-| `SQLITE_FILE` | `database.sqlite3` | Nome do arquivo do banco SQLite local |
-| `ADMIN_PIN` | `1234` | Senha de administração (para 5 cliques na logo e endpoint `/export`) |
-| `PORT` | `5000` | Porta TCP de execução da aplicação web |
-| `DB_HOST` | `localhost` | Host do PostgreSQL *(apenas se `DB_TYPE=postgres`)* |
-| `DB_PORT` | `5432` | Porta do PostgreSQL *(apenas se `DB_TYPE=postgres`)* |
-| `DB_NAME` | `emissions_db` | Nome do banco PostgreSQL |
-| `DB_USER` | `postgres` | Usuário do banco PostgreSQL |
-| `DB_PASSWORD` | `strong_password`| Senha do banco PostgreSQL |
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `DB_TYPE` | `sqlite` | Active database engine (`sqlite` or `postgres`) |
+| `SQLITE_FILE` | `database.sqlite3` | Disk path for the embedded SQLite database |
+| `ADMIN_PIN` | `1234` | Passcode for UI secret trigger and `/export` endpoints |
+| `PORT` | `5000` | Application server binding port |
+| `DB_HOST` | `localhost` | PostgreSQL host address *(when `DB_TYPE=postgres`)* |
+| `DB_PORT` | `5432` | PostgreSQL network port *(when `DB_TYPE=postgres`)* |
+| `DB_NAME` | `emissions_db` | Target PostgreSQL database name |
+| `DB_USER` | `postgres` | Database authentication username |
+| `DB_PASSWORD` | `strong_password` | Database authentication credentials |
 
 ---
 
-## Exportação de Relatórios
+## Data Export Workflows
 
-O sistema oferece três formas práticas de extrair os registros coletados:
+1. **Kiosk Touch UI Secret Trigger:**
+* Tap the **Consórcio Itá logo in the footer 5 consecutive times**.
+* Provide the configured `ADMIN_PIN` (default: `1234`).
+* Trigger direct client-side CSV download.
 
-1. **Pela Interface do Totem (Easter Egg):**
-   * Dê **5 toques rápidos na logo do Consórcio Itá** no rodapé da página.
-   * Insira o PIN administrativo configurado no `.env` (padrão `1234`).
-   * Clique no botão **"Baixar Relatório (CSV)"**.
-2. **Via Script de Terminal:**
-   ```bash
-   python backend/export_emissions.py
-   ```
-   *Gera o arquivo `emissions_AAAA-MM-DD.csv` pronto para abrir no Excel com acentuação e separadores brasileiros.*
-3. **Pela Rede Local via Navegador:**
-   * Acesse `http://<IP-DO-TOTEM>:5000/api/emission/export?pin=1234` de qualquer celular ou computador na mesma rede.
 
----
+2. **Local CLI Tooling:**
+```bash
+python backend/export_emissions.py
 
-## Endpoints da API REST
+```
 
-| Método | Endpoint | Descrição |
-|---|---|---|
-| `POST` | `/api/emission/` | Registra uma nova viagem e calcula a emissão de $CO_2$ |
-| `GET` | `/api/emission/` | Retorna todos os registros cadastrados |
-| `GET` | `/api/emission/co2/` | Retorna soma total de $CO_2$ e estimativa de árvores |
-| `GET` | `/api/emission/km/` | Retorna a distância total percorrida |
-| `GET` | `/api/emission/vehicles/` | Lista veículos utilizados |
-| `GET` | `/api/emission/fuels/` | Lista combustíveis utilizados |
-| `POST` | `/api/emission/verify-pin` | Valida o PIN administrativo informado |
-| `GET` | `/api/emission/export` | Download do relatório CSV (`?pin=...` ou header `X-Admin-Pin`) |
+
+*Generates an `emissions_YYYY-MM-DD.csv` payload formatted for immediate spreadsheet imports.*
+3. **LAN HTTP Request:**
+* Fetch `http://<KIOSK-IP>:5000/api/emission/export?pin=1234` from any authenticated client within the local subnet.
+
+
 
 ---
 
-## Realização e Equipe
+## API Reference
 
-* **Realização:** [Consórcio Itá](https://consorcioita.com.br) & [Instituto Federal Catarinense (IFC)](https://concordia.ifc.edu.br)
-* **Desenvolvedores:**
-  * [Gabriel Moura Jappe](https://github.com/jappejappe) ([@jappejappe](https://github.com/jappejappe))
-  * [Gustavo Schwitzki Peretti](https://github.com/GustavoPeretti) ([@GustavoPeretti](https://github.com/GustavoPeretti))
-  * [Vitor Marcelo Mignoni](https://github.com/vichsort) ([@vichsort](https://github.com/vichsort))
-  * Heitor Scalco Neto
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| `POST` | `/api/emission/` | Logs a commute record and computes corresponding $CO_2$ output |
+| `GET` | `/api/emission/` | Fetches historical emission records |
+| `GET` | `/api/emission/co2/` | Aggregates cumulative $CO_2$ output and tree offset projections |
+| `GET` | `/api/emission/km/` | Returns cumulative recorded travel distance |
+| `GET` | `/api/emission/vehicles/` | Lists logged vehicle distribution data |
+| `GET` | `/api/emission/fuels/` | Lists logged fuel type distribution data |
+| `POST` | `/api/emission/verify-pin` | Verifies administrative credentials |
+| `GET` | `/api/emission/export` | Generates CSV export stream (`?pin=...` or `X-Admin-Pin` header) |
 
 ---
 
-<div align="center">
-  <sub>Promovendo a sustentabilidade através da tecnologia 🌱⚡ Consórcio Itá & IFC</sub>
-</div>
+## Project Credits
+
+* **Sponsors & Organizations:** [Consórcio Itá](https://consorcioita.com.br) & [Instituto Federal Catarinense (IFC)](https://concordia.ifc.edu.br)
+* **Development Team:**
+* [Gabriel Moura Jappe](https://github.com/jappejappe) ([@jappejappe](https://github.com/jappejappe))
+* [Gustavo Schwitzki Peretti](https://github.com/GustavoPeretti) ([@GustavoPeretti](https://github.com/GustavoPeretti))
+* [Vitor Marcelo Mignoni](https://github.com/vichsort) ([@vichsort](https://github.com/vichsort))
+* Heitor Scalco Neto
+
+
+
+---
